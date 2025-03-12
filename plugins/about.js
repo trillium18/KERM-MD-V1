@@ -57,4 +57,4 @@ await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:about},{quoted
 console.log(e)
 reply(`${e}`)
 }
-}
+})
