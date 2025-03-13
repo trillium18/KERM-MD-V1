@@ -58,7 +58,6 @@ cmd({
     }
 
     // Vérifier si le message cité est un sticker
-   const isQuotedImage = m.quoted && (m.quoted.type === 'imageMessage' || (m.quoted.type === 'viewOnceMessage' && m.quoted.msg.type === 'imageMessage'));
     if (m.quoted.mtype !== "stickerMessage") {
       return reply("❌ The replied message is not a sticker.");
     }
