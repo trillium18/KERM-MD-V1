@@ -20,7 +20,7 @@ cmd({
         const isQuotedSticker = m.quoted && m.quoted.type === "stickerMessage";
 
         if (!isQuotedSticker) {
-            return reply("❌ Please reply to a sticker to convert it to an image.");
+            return reply("📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
         }
 
         // Download the sticker
