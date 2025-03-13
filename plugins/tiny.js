@@ -12,7 +12,8 @@ Github: Kgtech-cmr
 */
 
 const { cmd } = require("../command");
-const fetch = require("node-fetch"); // Assurez-vous que node-fetch est installé
+const fetch = require("node-fetch");
+const axios = require("axios");
 
 cmd({
     pattern: "tiny",
@@ -23,36 +24,23 @@ cmd({
     filename: __filename,
 },
 async (conn, mek, m, { from, quoted, isOwner, isAdmins, reply, args }) => {
-    if (!args[0]) return reply("Provide me a link");
+    console.log("Command tiny triggered"); // Ajoutez ceci pour vérifier si la commande est déclenchée
+
+    if (!args[0]) {
+        console.log("No URL provided"); // Ajoutez ceci pour vérifier si l'URL est fournie
+        return reply("Provide me a link");
+    }
 
     try {
         const link = args[0];
+        console.log("URL to shorten:", link); // Ajoutez ceci pour vérifier l'URL fournie
         const response = await axios.get(`https://tinyurl.com/api-create.php?url=${link}`);
         const shortenedUrl = response.data;
 
+        console.log("Shortened URL:", shortenedUrl); // Ajoutez ceci pour vérifier l'URL raccourcie
         return reply(`*🛡️Your Shortened URL*\n\n${shortenedUrl}`);
     } catch (e) {
-        console.error(e);
+        console.error("Error shortening URL:", e);
         return reply("An error occurred while shortening the URL. Please try again.");
     }
-    // Envoyer le message avec une image
-    await conn.sendMessage(from, { 
-      image: { url: `https://files.catbox.moe/heu4tc.png` }, // Image URL
-      caption: caption,
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363321386877609@newsletter',
-          newsletterName: '𝐊𝐄𝐑𝐌 𝐌𝐃',
-          serverMessageId: 143
-        }
-      }
-    }, { quoted: mek });
-
-  } catch (e) {
-    console.error("Error in shortining URL:", e);
-    reply(`❌ An error occurred: ${e.message}`);
-  }
 });
