@@ -254,7 +254,8 @@ let madeMenu = `*╭══〘〘 ${config.BOT_NAME} 〙〙*
 *┕───────────────────❒*
 `
 
-await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:madeMenu},{quoted:mek})
+await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:madeMenu},
+
 contextInfo: {
     mentionedJid: [m.sender],
     forwardingScore: 999,
