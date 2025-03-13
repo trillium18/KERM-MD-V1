@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { sms, downloadMediaMessage } = require('../lib/msg');
 
+
 cmd({
     pattern: "photo",
     react: "🤖",
@@ -20,7 +21,7 @@ cmd({
         const isQuotedSticker = m.quoted && m.quoted.type === "stickerMessage";
 
         if (!isQuotedSticker) {
-            return reply("📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
+            return reply("❌ Please reply to a sticker to convert it to an image.");
         }
 
         // Download the sticker
