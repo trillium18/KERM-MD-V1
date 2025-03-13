@@ -176,36 +176,38 @@ cmd({
 });
 
 cmd({
-  pattern: "photo",
-  alias: ["toimage", "photo"],
-  desc: "Convert a sticker to an image.",
-  category: "tools",
-  filename: __filename,
+    pattern: "photo",
+    react: "🤖",
+    alias: ["toimage", "photos"],
+    desc: "Convert a sticker to an image.",
+    category: "tools",
+    filename: __filename,
 }, async (conn, mek, m, { reply }) => {
-  try {
-    // Vérifier si l'utilisateur a répondu à un message
-    if (!m.quoted) {
-      return reply("*📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
+    try {
+        const isQuotedSticker = m.quoted && m.quoted.type === "stickerMessage";
+
+        if (!isQuotedSticker) {
+            return reply("📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
+        }
+
+        // Download the sticker
+        const nameJpg = getRandom(".jpg");
+        const stickerBuffer = await m.quoted.download();
+
+        if (!stickerBuffer) {
+            return reply("❌ Failed to download the sticker.");
+        }
+
+        // Save the file temporarily
+        await require("fs").promises.writeFile(nameJpg, stickerBuffer);
+
+        // Send the converted image
+        await conn.sendMessage(m.chat, { image: { url: nameJpg }, caption: "*✅ Here is your image.*" }, { quoted: m });
+
+        // Delete the temporary file
+        require("fs").unlinkSync(nameJpg);
+    } catch (error) {
+        reply("❌ An error occurred while converting.");
+        console.error(error);
     }
-
-    // Vérifier si le message cité est un sticker
-    if (m.quoted.mtype !== "stickerMessage") {
-      return reply("❌ The replied message is not a sticker.");
-    }
-
-    // Télécharger le sticker
-    let media = await m.quoted.download();
-
-    // Vérifier si le téléchargement a réussi
-    if (!media) {
-      return reply("❌ Failed to download the sticker.");
-    }
-
-    // Envoyer l'image convertie
-    await conn.sendMessage(m.chat, { image: media, caption: "*✅ HERE IS YOUR IMAGE.*" }, { quoted: m });
-
-  } catch (error) {
-    reply("❌ An error occurred while converting the sticker to an image.");
-    console.error(error);
-  }
 });
