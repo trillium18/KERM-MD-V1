@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const scheduleFile = path.join(__dirname, "scheduled_messages.json");
+const scheduleFile = path.join(__dirname, "../my_data/scheduled_messages.json");
 if (!fs.existsSync(scheduleFile)) fs.writeFileSync(scheduleFile, JSON.stringify([]));
 
 function loadScheduledMessages() {
