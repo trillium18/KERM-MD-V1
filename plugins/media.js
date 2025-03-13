@@ -174,7 +174,7 @@ cmd({
         reply("❌ Sorry, I couldn't fetch the time for the specified timezone. Please ensure the timezone is valid.");
     }
 });
-});
+
 cmd({
   pattern: "photo",
   alias: ["toimage", "photo"],
