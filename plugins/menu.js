@@ -260,7 +260,7 @@ contextInfo: {
     forwardingScore: 999,
     isForwarded: true,
     forwardedNewsletterMessageInfo: {
-      newsletterJid: '120363318387454868@newsletter',
+      newsletterJid: '120363321386877609@newsletter',
       newsletterName: '𝐊𝐄𝐑𝐌 𝐌𝐃 𝐕𝟏',
       serverMessageId: 999
     }
