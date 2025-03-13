@@ -19,7 +19,7 @@ cmd({
         if (!quoted) return reply("❌ Reply to a video to convert it to MP3!");
         if (quoted.type !== "videoMessage") return reply("❌ Reply to a video message!");
 
-      return  reply("⏳ Converting to MP3...");
+        reply("⏳ Converting to MP3...");
         let inputFile = `/tmp/${Date.now()}.mp4`;
         let outputFile = inputFile.replace(".mp4", ".mp3");
 
