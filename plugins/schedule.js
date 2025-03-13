@@ -142,7 +142,7 @@ const config = require('../config');
 
 // Fonction pour récupérer le fuseau horaire de l'utilisateur ou du groupe
 const getTimezone = (m) => {
-    const tz = m.isGroup ? m.chat.timezone : config.defaultTimezone;
+    const tz = m.isGroup ? m.chat.timezone : config.defaultTimezone; 
     return tz || 'UTC'; // Si aucun fuseau horaire n'est spécifié, on utilise UTC par défaut
 };
 
@@ -160,9 +160,9 @@ cmd({
         // Vérifier que l'heure et le message sont fournis
         if (args.length < 2) return reply("❌ Please provide the time (HH:MM) and the message to schedule.");
         
-        const timeString = args[0];
-        const message = args.slice(1).join(" ");
-        
+        const timeString = args[0]; // Heure fournie par l'utilisateur
+        const message = args.slice(1).join(" "); // Le message à envoyer
+
         // Récupérer le fuseau horaire de l'utilisateur ou du groupe
         const timezone = getTimezone(m);
         
@@ -172,14 +172,15 @@ cmd({
             return reply("❌ The time format is invalid. Please use HH:MM.");
         }
         
-        // Créer un objet avec l'heure et le message
+        // Créer un objet avec l'heure, le message et le fuseau horaire
         const scheduledMessage = {
             time: time.format('YYYY-MM-DD HH:mm'),
             message: message,
-            timezone: timezone
+            timezone: timezone,
+            chat: m.chat // Ajouter l'ID du chat pour envoyer le message
         };
 
-        // Sauvegarder l'horaire et le message dans un fichier JSON
+        // Sauvegarder l'horaire et le message dans le fichier JSON
         let scheduledMessages = JSON.parse(fs.readFileSync('../my_data/scheduled_messages.json', 'utf8') || '[]');
         scheduledMessages.push(scheduledMessage);
         fs.writeFileSync('../my_data/scheduled_messages.json', JSON.stringify(scheduledMessages, null, 2));
