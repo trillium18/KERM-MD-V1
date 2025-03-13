@@ -1,3 +1,4 @@
+/*
 const { cmd } = require("../command");
 const fs = require("fs");
 const path = require("path");
@@ -131,3 +132,86 @@ setInterval(async () => {
         console.error("Error in scheduled message check:", e);
     }
 }, 60000); // Check every minute
+
+*/
+
+const moment = require('moment-timezone');
+const fs = require('fs');
+const { cmd } = require('../command');
+const config = require('../config');
+
+// Fonction pour récupérer le fuseau horaire de l'utilisateur ou du groupe
+const getTimezone = (m) => {
+    const tz = m.isGroup ? m.chat.timezone : config.defaultTimezone;
+    return tz || 'UTC'; // Si aucun fuseau horaire n'est spécifié, on utilise UTC par défaut
+};
+
+// Commande .schedule
+cmd({
+    pattern: "schedule",
+    desc: "Program a message to be sent at a specific time.",
+    category: "tools",
+    react: "⏰",
+    filename: __filename,
+}, async (conn, mek, m, { reply, args, isOwner }) => {
+    if (!isOwner) return reply("❌ Only the owner can use this command.");
+    
+    try {
+        // Vérifier que l'heure et le message sont fournis
+        if (args.length < 2) return reply("❌ Please provide the time (HH:MM) and the message to schedule.");
+        
+        const timeString = args[0];
+        const message = args.slice(1).join(" ");
+        
+        // Récupérer le fuseau horaire de l'utilisateur ou du groupe
+        const timezone = getTimezone(m);
+        
+        // Vérifier si l'heure est valide
+        const time = moment.tz(timeString, 'HH:mm', timezone);
+        if (!time.isValid()) {
+            return reply("❌ The time format is invalid. Please use HH:MM.");
+        }
+        
+        // Créer un objet avec l'heure et le message
+        const scheduledMessage = {
+            time: time.format('YYYY-MM-DD HH:mm'),
+            message: message,
+            timezone: timezone
+        };
+
+        // Sauvegarder l'horaire et le message dans un fichier JSON
+        let scheduledMessages = JSON.parse(fs.readFileSync('../my_data/scheduled_messages.json', 'utf8') || '[]');
+        scheduledMessages.push(scheduledMessage);
+        fs.writeFileSync('../my_data/scheduled_messages.json', JSON.stringify(scheduledMessages, null, 2));
+
+        // Répondre pour confirmer que le message a été programmé
+        return reply(`✅ Your message has been scheduled for ${time.format('HH:mm')} (${timezone})`);
+
+    } catch (error) {
+        console.error(error);
+        return reply("❌ An error occurred while scheduling the message.");
+    }
+});
+
+// Fonction pour vérifier et envoyer les messages programmés
+const checkScheduledMessages = async () => {
+    try {
+        const currentTime = moment().format('YYYY-MM-DD HH:mm');
+        const scheduledMessages = JSON.parse(fs.readFileSync('../my_data/scheduled_messages.json', 'utf8') || '[]');
+
+        for (let i = 0; i < scheduledMessages.length; i++) {
+            const scheduledMessage = scheduledMessages[i];
+            
+            if (scheduledMessage.time === currentTime) {
+                await conn.sendMessage(scheduledMessage.chat, { text: scheduledMessage.message });
+                scheduledMessages.splice(i, 1); // Supprimer le message envoyé
+                fs.writeFileSync('../my_data/scheduled_messages.json', JSON.stringify(scheduledMessages, null, 2));
+            }
+        }
+    } catch (error) {
+        console.error("Error checking scheduled messages:", error);
+    }
+};
+
+// Lancer la vérification des messages programmés toutes les minutes
+setInterval(checkScheduledMessages, 60000);
