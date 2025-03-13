@@ -12,7 +12,7 @@ const { sms, downloadMediaMessage } = require('../lib/msg');
 cmd({
     pattern: "photo",
     react: "🤖",
-    alias: ["toimage", "photo"],
+    alias: ["toimage", "image"],
     desc: "Convert a sticker to an image.",
     category: "tools",
     filename: __filename,
@@ -21,7 +21,7 @@ cmd({
         const isQuotedSticker = m.quoted && m.quoted.type === "stickerMessage";
 
         if (!isQuotedSticker) {
-            return reply("❌ Please reply to a sticker to convert it to an image.");
+            return reply("*📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
         }
 
         // Download the sticker
