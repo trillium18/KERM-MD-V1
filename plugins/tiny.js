@@ -14,71 +14,26 @@ Github: Kgtech-cmr
 const { cmd } = require("../command");
 const fetch = require("node-fetch"); // Assurez-vous que node-fetch est installé
 
-// Définition de la fonction fetchJson
-const fetchJson = async (url, options) => {
-  try {
-    const res = await fetch(url, options);
-    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.error("Error in fetchJson:", err);
-    throw err;
-  }
-};
-
 cmd({
-  pattern: 'tinyurl',
-  alias: ['tiny', 'shorten', 'short', 'shorturl'],
-  react: '🪤',
-  desc: 'Shorten a URL using TinyURL or ShortURL.',
-  category: 'main',
-  filename: __filename
-}, async (conn, mek, m, {
-  from,
-  quoted,
-  body,
-  isCmd,
-  command,
-  args,
-  q,
-  isGroup,
-  sender,
-  senderNumber,
-  botNumber2,
-  botNumber,
-  pushname,
-  isMe,
-  isOwner,
-  groupMetadata,
-  groupName,
-  participants,
-  groupAdmins,
-  isBotAdmins,
-  isAdmins,
-  reply
-}) => {
-  try {
-    if (!q) return reply('Please provide a URL to shorten.');
+    pattern: "tiny",
+    desc: "Makes URL tiny.",
+    category: "converter",
+    use: "<url>",
+    filename: __filename,
+},
+async (conn, mek, m, { from, quoted, isOwner, isAdmins, reply, args }) => {
+    if (!args[0]) return reply("Provide me a link");
 
-    await reply('> *Kerm Processing...*');
+    try {
+        const link = args[0];
+        const response = await axios.get(`https://tinyurl.com/api-create.php?url=${link}`);
+        const shortenedUrl = response.data;
 
-    // Construire l'URL de l'API selon la commande utilisée
-    let apiUrl = '';
-    if (command === 'tiny' || command === 'tinyurl') {
-      apiUrl = `https://api.davidcyriltech.my.id/tinyurl?url=${encodeURIComponent(q)}`;
-    } else {
-      apiUrl = `https://api.davidcyriltech.my.id/tinyurl?url=${encodeURIComponent(q)}`;
+        return reply(`*🛡️Your Shortened URL*\n\n${shortenedUrl}`);
+    } catch (e) {
+        console.error(e);
+        return reply("An error occurred while shortening the URL. Please try again.");
     }
-
-    await reply('> *Shortening URL...*');
-
-    // Appel à l'API pour raccourcir l'URL
-    const response = await fetchJson(apiUrl);
-    const result = response.result;
-
-    // Construire la légende avec l'URL raccourcie
-    const caption = ` \`KERM URL SHORTENER\` \n\n\n*Original Link:* ${q}\n\n*Shortened Link:* ${result}\n\n> 𝖯𝖮𝖶𝖤𝖱𝖤𝖣 𝖡𝖸 𝖪𝖤𝖱𝖬`;
-
     // Envoyer le message avec une image
     await conn.sendMessage(from, { 
       image: { url: `https://files.catbox.moe/heu4tc.png` }, // Image URL
