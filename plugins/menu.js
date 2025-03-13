@@ -254,9 +254,8 @@ let madeMenu = `*╭══〘〘 ${config.BOT_NAME} 〙〙*
 *┕───────────────────❒*
 `
 
-await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:madeMenu},
-
-contextInfo: {
+await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:madeMenu,
+                          contextInfo: {
     mentionedJid: [m.sender],
     forwardingScore: 999,
     isForwarded: true,
@@ -267,7 +266,6 @@ contextInfo: {
     }
   }
 }, { quoted: mek });
-
 }catch(e){
 console.log(e)
 reply(`${e}`)
