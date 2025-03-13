@@ -9,31 +9,43 @@ const path = require('path');
 const { sms, downloadMediaMessage } = require('../lib/msg');
 
 cmd({
-    pattern: "tomp3",
+    pattern: "mp3",
+    alias: ["tomp3"],
     desc: "Convert video to MP3.",
     category: "converter",
     react: "🎵",
     filename: __filename
-}, async (conn, mek, m, { from, quoted, reply }) => {
+}, async (conn, mek, m, { from, reply }) => {
     try {
-        if (!quoted) return reply("❌ Reply to a video to convert it to MP3!");
-        if (quoted.type !== "videoMessage") return reply("❌ Reply to a video message!");
+        // Check if the message is a reply
+        if (!m.quoted) return reply("❌ Reply to a video to convert it to MP3!");
+        if (m.quoted.mtype !== "videoMessage") return reply("❌ Reply to a video message!");
 
         reply("⏳ Converting to MP3...");
-        let inputFile = `/tmp/${Date.now()}.mp4`;
-        let outputFile = inputFile.replace(".mp4", ".mp3");
 
-        fs.writeFileSync(inputFile, await downloadMediaMessage(quoted, inputFile));
+        // Define file paths
+        const inputFile = path.join(__dirname, `${Date.now()}.mp4`);
+        const outputFile = inputFile.replace(".mp4", ".mp3");
 
-        exec(`ffmpeg -i ${inputFile} -q:a 0 -map a ${outputFile}`, async (err) => {
+        // Download the video
+        const videoBuffer = await m.quoted.download();
+        if (!videoBuffer) return reply("❌ Failed to download the video!");
+
+        // Write the video file
+        fs.writeFileSync(inputFile, videoBuffer);
+
+        // Convert video to MP3
+        exec(`ffmpeg -i "${inputFile}" -q:a 0 -map a "${outputFile}"`, async (err) => {
             if (err) {
                 console.error(err);
                 return reply("❌ Error converting video to MP3!");
             }
 
-            let audioBuffer = fs.readFileSync(outputFile);
+            // Send the MP3 file
+            const audioBuffer = fs.readFileSync(outputFile);
             await conn.sendMessage(from, { audio: audioBuffer, mimetype: "audio/mpeg" }, { quoted: m });
 
+            // Delete temporary files
             fs.unlinkSync(inputFile);
             fs.unlinkSync(outputFile);
         });
@@ -56,27 +68,27 @@ cmd({
         const isQuotedSticker = m.quoted && m.quoted.type === "stickerMessage";
 
         if (!isQuotedSticker) {
-            return reply("❌ Veuillez répondre à un sticker pour le convertir en image.");
+            return reply("*📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
         }
 
-        // Télécharger le sticker
+        // Download the sticker
         const nameJpg = getRandom(".jpg");
         const stickerBuffer = await m.quoted.download();
 
         if (!stickerBuffer) {
-            return reply("❌ Échec du téléchargement du sticker.");
+            return reply("❌ Failed to download the sticker.");
         }
 
-        // Sauvegarder le fichier temporairement
+        // Save the file temporarily
         await require("fs").promises.writeFile(nameJpg, stickerBuffer);
 
-        // Envoyer l'image convertie
-        await conn.sendMessage(m.chat, { image: { url: nameJpg }, caption: "*✅ Voici votre image.*" }, { quoted: m });
+        // Send the converted image
+        await conn.sendMessage(m.chat, { image: { url: nameJpg }, caption: "*✅ Here is your image.*" }, { quoted: m });
 
-        // Supprimer le fichier temporaire
+        // Delete the temporary file
         require("fs").unlinkSync(nameJpg);
     } catch (error) {
-        reply("❌ Une erreur est survenue lors de la conversion.");
+        reply("❌ An error occurred while converting.");
         console.error(error);
     }
 });
