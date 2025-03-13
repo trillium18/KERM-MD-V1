@@ -12,6 +12,13 @@ Github: Kgtech-cmr
 */
 
 const { cmd } = require('../command');
+const config = require('../config');
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson, empiretourl } = require('../lib/functions');
+const ffmpeg = require('fluent-ffmpeg');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fs = require('fs');
+const path = require('path');
+const { sms, downloadMediaMessage } = require('../lib/msg');
 const axios = require('axios');
 const moment = require('moment');
 
@@ -187,7 +194,7 @@ cmd({
         const isQuotedSticker = m.quoted && m.quoted.type === "stickerMessage";
 
         if (!isQuotedSticker) {
-            return reply("📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
+            return reply("*📛 ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ ᴀɴ ɪᴍᴀɢᴇ.*");
         }
 
         // Download the sticker
