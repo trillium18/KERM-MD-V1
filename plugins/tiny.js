@@ -16,6 +16,7 @@ const fetch = require("node-fetch"); // Assurez-vous que node-fetch est installÃ
 
 cmd({
     pattern: "tiny",
+    react: "ğŸ«§",
     desc: "Makes URL tiny.",
     category: "converter",
     use: "<url>",
