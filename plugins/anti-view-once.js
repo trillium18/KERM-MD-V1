@@ -25,19 +25,25 @@ cmd(
     filename: __filename,
   },
   async (bot, message, args, { from, quoted, reply }) => {
-    let filePath; // Déclaration en amont pour l'utiliser dans finally
+    let filePath;
     try {
-      // Vérifier que le message cité contient une propriété "message"
+      // Récupère le message contenant le média (soit cité, soit le message lui-même)
       const mediaMessage = quoted || message;
       if (!mediaMessage || !mediaMessage.message) {
         return reply('Please reply to a media message');
       }
 
+      // Déplier le message s'il est encapsulé dans un message éphémère
+      let messageContent = mediaMessage.message;
+      if (messageContent.ephemeralMessage) {
+        messageContent = messageContent.ephemeralMessage.message;
+      }
+
       // Extraire le contenu média (image, vidéo ou document)
       const mediaContent =
-        mediaMessage.message.imageMessage ||
-        mediaMessage.message.videoMessage ||
-        mediaMessage.message.documentMessage;
+        messageContent.imageMessage ||
+        messageContent.videoMessage ||
+        messageContent.documentMessage;
 
       if (!mediaContent || !mediaContent.mimetype) {
         return reply('Please reply to a media message');
@@ -45,13 +51,15 @@ cmd(
 
       // Télécharger le fichier média
       filePath = await downloadAndSaveMediaMessage(mediaMessage, {});
-      if (!filePath) return reply('Failed to download media');
+      if (!filePath) {
+        return reply('Failed to download media');
+      }
 
-      // Déterminer le type de média et la légende
+      // Déterminer le type de média et récupérer la légende
       const isImage = mediaContent.mimetype.startsWith('image/');
       const caption = mediaContent.caption || '';
 
-      // Renvoyer le média avec la légende d'origine
+      // Envoyer le média avec la légende d'origine
       await bot.sendMessage(
         from,
         {
@@ -66,7 +74,7 @@ cmd(
       console.error('Save error:', error);
       reply('Failed to save media. Please try again.');
     } finally {
-      // Supprimer le fichier temporaire s'il existe
+      // Nettoyer le fichier temporaire si il existe
       if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
