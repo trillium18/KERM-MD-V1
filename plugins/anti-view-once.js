@@ -46,32 +46,30 @@ cmd({
     // Traitement selon le type de média
     if (viewOnceContent.message.imageMessage) {
       let caption = viewOnceContent.message.imageMessage.caption || "📷 Image ViewOnce";
-      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.imageMessage);
-      console.log("Image téléchargée à :", mediaPath);
-
+      // Téléchargement du média via downloadMediaMessage qui renvoie un buffer
+      let mediaBuffer = await client.downloadMediaMessage(viewOnceContent.message.imageMessage);
+      console.log("Image téléchargée");
       return client.sendMessage(from, {
-        image: { url: mediaPath },
+        image: mediaBuffer,
         caption: caption
       }, { quoted: message });
     }
     
     if (viewOnceContent.message.videoMessage) {
       let caption = viewOnceContent.message.videoMessage.caption || "🎥 Vidéo ViewOnce";
-      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.videoMessage);
-      console.log("Vidéo téléchargée à :", mediaPath);
-
+      let mediaBuffer = await client.downloadMediaMessage(viewOnceContent.message.videoMessage);
+      console.log("Vidéo téléchargée");
       return client.sendMessage(from, {
-        video: { url: mediaPath },
+        video: mediaBuffer,
         caption: caption
       }, { quoted: message });
     }
     
     if (viewOnceContent.message.audioMessage) {
-      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.audioMessage);
-      console.log("Audio téléchargé à :", mediaPath);
-
+      let mediaBuffer = await client.downloadMediaMessage(viewOnceContent.message.audioMessage);
+      console.log("Audio téléchargé");
       return client.sendMessage(from, {
-        audio: { url: mediaPath }
+        audio: mediaBuffer
       }, { quoted: message });
     }
     
@@ -80,7 +78,6 @@ cmd({
     
   } catch (error) {
     console.error("Erreur lors de la récupération du message ViewOnce :", error);
-    // Affichage détaillé de l'erreur pour le débogage (peut être retiré en production)
     return reply(`❌ Une erreur est survenue lors de la récupération du message *ViewOnce* : ${error.message || error}`);
   }
 });
