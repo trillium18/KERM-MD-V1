@@ -28,6 +28,7 @@ cmd({
         return reply("*Example: .mode private or .mode public*");
     }
 });
+
 cmd({
     pattern: "setprefix",
     alias: ["prefix"],
@@ -36,16 +37,11 @@ cmd({
     filename: __filename,
 }, async (conn, mek, m, { from, args, isOwner, reply }) => {
     if (!isOwner) return reply("*📛 Only the owner can use this command!*");
-
-    if (args.length === 0) {
-        return reply("*🫟 Please provide the prefix you want to set.*");
-    }
+    if (!args[0]) return reply("*🫟 Please provide the new prefix you want to set.*");
 
     const newPrefix = args[0];
-
     config.PREFIX = newPrefix;
-
-    return reply(`✅ The prefix has been successfully changed to *${newPrefix}*`);
+    return reply(`✅ The bot prefix has been changed to *${newPrefix}*`);
 });
 
 cmd({
