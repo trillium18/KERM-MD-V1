@@ -30,21 +30,6 @@ cmd({
 });
 
 cmd({
-    pattern: "setprefix",
-    alias: ["prefix"],
-    desc: "Set a custom prefix for the bot.",
-    category: "settings",
-    filename: __filename,
-}, async (conn, mek, m, { from, args, isOwner, reply }) => {
-    if (!isOwner) return reply("*📛 Only the owner can use this command!*");
-    if (!args[0]) return reply("*🫟 Please provide the new prefix you want to set.*");
-
-    const newPrefix = args[0];
-    config.PREFIX = newPrefix;
-    return reply(`✅ The bot prefix has been changed to *${newPrefix}*`);
-});
-
-cmd({
     pattern: "autotyping",
     description: "Enable or disable auto-typing feature.",
     category: "settings",
