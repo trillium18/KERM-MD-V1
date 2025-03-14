@@ -678,3 +678,24 @@ cmd({
         reply(`❌ Failed to update group profile picture: ${e.message}`);
     }
 });
+cmd({
+    pattern: "heartreact",
+    alias: ["heart"],
+    desc: "Enable or disable heart react.",
+    category: "settings",
+    filename: __filename,
+}, async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 ᴏɴʟʏ ᴛʜᴇ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!*");
+
+    const option = args[0]?.toLowerCase();
+    
+    if (option === "on" || option === "true") {
+        config.HEART_REACT = "true"; // Set to "true" for enabling
+        return reply("❤️ Heart react is now enabled.");
+    } else if (option === "off" || option === "false") {
+        config.HEART_REACT = "false"; // Set to "false" for disabling
+        return reply("💔 Heart react is now disabled.");
+    } else {
+        return reply("*🔥 Example: .heartreact on* or *[.heartreact off]*");
+    }
+});
