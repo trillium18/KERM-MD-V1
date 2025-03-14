@@ -10,6 +10,32 @@ let antilinkAction = "off"; // Default state
 let warnCount = {}; // Track warnings per user
 
 cmd({
+    pattern: "mode1",
+    desc: "Set bot mode to private or public.",
+    category: "settings",
+    filename: __filename,
+}, async (conn, mek, m, { from, args, isOwner, reply }) => {
+    if (!isOwner) return reply("*📛 Only the owner can use this command!*");
+
+    // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
+    if (!args[0]) {
+        return reply(`📌 Current mode: *${config.MODE}*\n\nUsage: .mode private OR .mode public`);
+    }
+
+    const modeArg = args[0].toLowerCase();
+
+    if (modeArg === "private") {
+        config.MODE = "private";
+        return reply("✅ Bot mode is now set to *PRIVATE*.");
+    } else if (modeArg === "public") {
+        config.MODE = "public";
+        return reply("✅ Bot mode is now set to *PUBLIC*.");
+    } else {
+        return reply("❌ Invalid mode. Please use `.mode private` or `.mode public`.");
+    }
+});
+
+cmd({
     pattern: "mode",
     desc: "Set bot mode to private or public.",
     category: "settings",
