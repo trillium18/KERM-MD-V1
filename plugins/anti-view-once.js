@@ -25,22 +25,33 @@ cmd(
     filename: __filename,
   },
   async (bot, message, args, { from, quoted, reply }) => {
+    let filePath; // Déclaration en amont pour l'utiliser dans finally
     try {
-      // Check for quoted message
+      // Vérifier que le message cité contient une propriété "message"
       const mediaMessage = quoted || message;
-      if (!mediaMessage || !mediaMessage.mimetype) {
+      if (!mediaMessage || !mediaMessage.message) {
         return reply('Please reply to a media message');
       }
 
-      // Download the media file
-      const filePath = await downloadAndSaveMediaMessage(mediaMessage, {});
+      // Extraire le contenu média (image, vidéo ou document)
+      const mediaContent =
+        mediaMessage.message.imageMessage ||
+        mediaMessage.message.videoMessage ||
+        mediaMessage.message.documentMessage;
+
+      if (!mediaContent || !mediaContent.mimetype) {
+        return reply('Please reply to a media message');
+      }
+
+      // Télécharger le fichier média
+      filePath = await downloadAndSaveMediaMessage(mediaMessage, {});
       if (!filePath) return reply('Failed to download media');
 
-      // Get media type and caption
-      const isImage = mediaMessage.mimetype.startsWith('image/');
-      const caption = mediaMessage.caption || '';
+      // Déterminer le type de média et la légende
+      const isImage = mediaContent.mimetype.startsWith('image/');
+      const caption = mediaContent.caption || '';
 
-      // Resend the media with original caption
+      // Renvoyer le média avec la légende d'origine
       await bot.sendMessage(
         from,
         {
@@ -51,12 +62,11 @@ cmd(
       );
 
       reply('Media saved successfully!');
-
     } catch (error) {
       console.error('Save error:', error);
       reply('Failed to save media. Please try again.');
     } finally {
-      // Clean up temporary file
+      // Supprimer le fichier temporaire s'il existe
       if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
