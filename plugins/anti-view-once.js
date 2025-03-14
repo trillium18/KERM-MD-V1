@@ -11,46 +11,55 @@ YT: KermHackTools
 Github: Kgtech-cmr
 */ 
 
-const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const mime = require('mime-types');
 const { downloadAndSaveMediaMessage } = require('@whiskeysockets/baileys');
+const fs = require('fs');
 const { cmd } = require('../command');
 
 cmd(
   {
     pattern: 'vv',
-    react: '🔗',
-    desc: 'Convert media to URL using catbox.moe API.',
-    category: 'anime',
-    use: '.maid',
+    react: '💾',
+    desc: 'Save quoted media message',
+    category: 'utility',
+    use: '.vv (reply to media)',
     filename: __filename,
   },
-  async (_bot, _message, _args, { from, quoted, reply }) => {
+  async (bot, message, args, { from, quoted, reply }) => {
     try {
-      // Check if a media message is quoted
-      let mediaMessage = quoted ? quoted : _message;
-      let quotedMessage = (mediaMessage.msg || mediaMessage).mimetype || '';
-
-      if (quotedMessage) {
-        if (mediaMessage.imageMessage) {
-          let imageCaption = mediaMessage.imageMessage.caption;
-          let imageUrl = await downloadAndSaveMediaMessage(mediaMessage.imageMessage);
-          _bot.sendMessage(from, { image: { url: imageUrl }, caption: imageCaption });
-        } else if (mediaMessage.videoMessage) {
-          let videoCaption = mediaMessage.videoMessage.caption;
-          let videoUrl = await downloadAndSaveMediaMessage(mediaMessage.videoMessage);
-          _bot.sendMessage(from, { video: { url: videoUrl }, caption: videoCaption });
-        }
-      } else {
-        return reply('No quoted media found to save.');
+      // Check for quoted message
+      const mediaMessage = quoted || message;
+      if (!mediaMessage || !mediaMessage.mimetype) {
+        return reply('Please reply to a media message');
       }
+
+      // Download the media file
+      const filePath = await downloadAndSaveMediaMessage(mediaMessage, {});
+      if (!filePath) return reply('Failed to download media');
+
+      // Get media type and caption
+      const isImage = mediaMessage.mimetype.startsWith('image/');
+      const caption = mediaMessage.caption || '';
+
+      // Resend the media with original caption
+      await bot.sendMessage(
+        from,
+        {
+          [isImage ? 'image' : 'video']: { url: filePath },
+          caption: caption,
+        },
+        { quoted: message }
+      );
+
+      reply('Media saved successfully!');
+
     } catch (error) {
-      console.error('Error processing media message:', error);
-      return reply('An error occurred while processing the media message.');
+      console.error('Save error:', error);
+      reply('Failed to save media. Please try again.');
+    } finally {
+      // Clean up temporary file
+      if (filePath && fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
   }
 );
