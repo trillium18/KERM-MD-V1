@@ -234,7 +234,7 @@ if (!isReact && senderNumber === botNumber) {
     }
 }        
 //=================================WORKTYPE=========================================== 
-const modeFile = '../my_data/mode.json';
+const modeFile = './my_data/mode.json';
 if (fs.existsSync(modeFile)) {
     const modeData = JSON.parse(fs.readFileSync(modeFile, 'utf8'));
     config.MODE = modeData.mode || "private";
