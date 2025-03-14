@@ -1,9 +1,8 @@
-/*
 const { cmd, commands } = require('../command');
 const config = require('../config');
 const prefix = config.PREFIX;
 const fs = require('fs');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions2');
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions');
 const { writeFileSync } = require('fs');
 const path = require('path');
 
@@ -11,7 +10,7 @@ let antilinkAction = "off"; // Default state
 let warnCount = {}; // Track warnings per user
 
 cmd({
-    pattern: "auto-typing",
+    pattern: "autotyping",
     description: "Enable or disable auto-typing feature.",
     category: "settings",
     filename: __filename
@@ -24,14 +23,14 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
         return reply("*🫟 ᴇxᴀᴍᴘʟᴇ:  .ᴀᴜᴛᴏ-ᴛʏᴘɪɴɢ ᴏɴ*");
     }
 
-    config.AUTO_TYPING = status === "on" ? "true" : "false";
+    config.FAKE_TYPING = status === "on" ? "true" : "false";
     return reply(`Auto typing has been turned ${status}.`);
 });
 //--------------------------------------------
 // ALWAYS_ONLINE COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "always-online",
+    pattern: "alwaysonline",
     alias: ["alwaysonline"],
     description: "Set bot status to always online or offline.",
     category: "settings",
@@ -53,7 +52,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //  AUTO_RECORDING COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "auto-recording",
+    pattern: "autorecording",
     alias: ["autorecoding"],
     description: "Enable or disable auto-recording feature.",
     category: "settings",
@@ -67,7 +66,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
         return reply("*🫟 ᴇxᴀᴍᴘʟᴇ: .ᴀᴜᴛᴏ-ʀᴇᴄᴏʀᴅɪɴɢ ᴏɴ*");
     }
 
-    config.AUTO_RECORDING = status === "on" ? "true" : "false";
+    config.FAKE_RECORDING = status === "on" ? "true" : "false";
     if (status === "on") {
         await conn.sendPresenceUpdate("recording", from);
         return reply("Auto recording is now enabled. Bot is recording...");
@@ -80,7 +79,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 // AUTO_VIEW_STATUS COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "auto-seen",
+    pattern: "autoreadstatus",
     alias: ["autostatusview"],
     desc: "Enable or disable auto-viewing of statuses",
     category: "settings",
@@ -92,10 +91,10 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
     const status = args[0]?.toLowerCase();
     // Default value for AUTO_VIEW_STATUS is "false"
     if (args[0] === "on") {
-        config.AUTO_VIEW_STATUS = "true";
+        config.AUTO_READ_STATUS = "true";
         return reply("Auto-viewing of statuses is now enabled.");
     } else if (args[0] === "off") {
-        config.AUTO_VIEW_STATUS = "false";
+        config.AUTO_READ_STATUS = "false";
         return reply("Auto-viewing of statuses is now disabled.");
     } else {
         return reply(`*🫟 ᴇxᴀᴍᴘʟᴇ:  .ᴀᴜᴛᴏ-sᴇᴇɴ ᴏɴ*`);
@@ -104,6 +103,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //--------------------------------------------
 // AUTO_LIKE_STATUS COMMANDS
 //--------------------------------------------
+/*
 cmd({
     pattern: "status-react",
     alias: ["statusreaction"],
@@ -126,6 +126,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
         return reply(`Example: . status-react on`);
     }
 });
+
 cmd({
     pattern: "anti-call",
     alias: ["statusreaction"],
@@ -173,11 +174,12 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
         return reply(`_example:  .readmessage on_`);
     }
 });
+*/
 //--------------------------------------------
 //  ANI-BAD COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "anti-bad",
+    pattern: "antibad",
     alias: ["antibadword"],
     desc: "enable or disable antibad.",
     category: "settings",
@@ -202,7 +204,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //  AUTO-STICKER COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "auto-sticker",
+    pattern: "autosticker",
     alias: ["autosticker"],
     desc: "enable or disable auto-sticker.",
     category: "settings",
@@ -227,7 +229,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //  AUTO-REPLY COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "auto-reply",
+    pattern: "autoreply",
     alias: ["autoreply"],
     desc: "enable or disable auto-reply.",
     category: "settings",
@@ -253,7 +255,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //   AUTO-REACT COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "auto-react",
+    pattern: "autoreact",
     alias: ["autoreact"],
     desc: "Enable or disable the autoreact feature",
     category: "settings",
@@ -277,6 +279,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
 //--------------------------------------------
 //  STATUS-REPLY COMMANDS
 //--------------------------------------------
+/*
 cmd({
     pattern: "status-reply",
     alias: ["autostatusreply"],
@@ -299,6 +302,7 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
         return reply(`*🫟 ᴇxᴀᴍᴘʟᴇ:  .sᴛᴀᴛᴜs-ʀᴇᴘʟʏ ᴏɴ*`);
     }
 });
+*/
 //--------------------------------------------
 //  ANTILINK1 COMMANDS
 //--------------------------------------------
@@ -352,7 +356,7 @@ let antibotAction = "off"; // Default action is off
 let warnings = {}; // Store warning counts per user
 
 cmd({
-    pattern: "anti-bot",
+    pattern: "antibot",
     alias: ["antibot"],
     desc: "Enable Antibot and set action (off/warn/delete/kick)",
     category: "group",
@@ -402,76 +406,10 @@ cmd({
 });
 
 //--------------------------------------------
-// ACCEPT_ALL COMMANDS
-//--------------------------------------------
-cmd({
-  pattern: "acceptall",
-  alias: ["approve"],
-  category: "group",
-  desc: "Accept all participant requests in the group.",
-  filename: __filename,
-}, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, config, reply }) => {
-  try {
-    if (!isGroup) {
-      return reply("This command can only be used in groups.");
-    }
-
-    const jid = from; // Group ID (from the message)
-    const groupParticipants = groupMetadata.participants; // List of participants in the group
-
-    const pendingRequests = groupParticipants.filter(p => p.isPending); // Filter pending participants
-
-    if (pendingRequests.length === 0) {
-      return reply("No pending participants to accept.");
-    }
-
-    const userJids = pendingRequests.map(p => p.id); // Get JIDs of the pending participants
-
-    const response = await conn.groupRequestParticipantsUpdate(jid, userJids, 'approve');
-    console.log(response);
-    reply(`${userJids.length} participant(s) have been accepted.`);
-  } catch (e) {
-    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-  }
-});
-//--------------------------------------------
-// REJECT_ALL COMMANDS
-//--------------------------------------------
-cmd({
-  pattern: "rejectall",
-  alias: ["rejects"],
-  category: "group",
-  desc: "Reject all participant requests in the group.",
-  filename: __filename,
-}, async (conn, mek, m, { from, isGroup, body, sender, groupMetadata, participants, config, reply }) => {
-  try {
-    if (!isGroup) {
-      return reply("This command can only be used in groups.");
-    }
-
-    const jid = from; // Group ID (from the message)
-    const groupParticipants = groupMetadata.participants; // List of participants in the group
-
-    const pendingRequests = groupParticipants.filter(p => p.isPending); // Filter pending participants
-
-    if (pendingRequests.length === 0) {
-      return reply("No pending participants to reject.");
-    }
-
-    const userJids = pendingRequests.map(p => p.id); // Get JIDs of the pending participants
-
-    const response = await conn.groupRequestParticipantsUpdate(jid, userJids, 'reject');
-    console.log(response);
-    reply(`${userJids.length} participant(s) have been rejected.`);
-  } catch (e) {
-    return reply(`*An error occurred while processing your request.*\n\n_Error:_ ${e.message}`);
-  }
-});
-//--------------------------------------------
 //  ANTILINK COMMANDS
 //--------------------------------------------
 cmd({
-  pattern: "anti-link",
+  pattern: "antilink",
   alias: ["antilink"],
   desc: "Enable or disable anti-link feature in groups",
   category: "group",
@@ -621,7 +559,7 @@ cmd({
 //  AUTO_RECORDING COMMANDS
 //--------------------------------------------
 cmd({
-    pattern: "invite",
+    pattern: "invite2",
     alias: ["glink"],
     desc: "Get group invite link.",
     category: "group", // Already group
@@ -658,47 +596,6 @@ cmd({
     } catch (error) {
         console.error("Error in invite command:", error);
         reply(`An error occurred: ${error.message || "Unknown error"}`);
-    }
-});
-
-//--------------------------------------------
-//  GINFO COMMANDS
-//--------------------------------------------
-cmd({
-    pattern: "ginfo",
-    desc: "Get group information.",
-    category: "group",
-    filename: __filename,
-}, async (conn, mek, m, { from, quoted, body, args, q, isGroup, sender, reply }) => {
-    try {
-        if (!isGroup) return reply("𝐓𝐡𝐢𝐬 𝐅𝐞𝐚𝐭𝐮𝐫𝐞 𝐈𝐬 𝐎𝐧𝐥𝐲 𝐅𝐨𝐫 𝐆𝐫𝐨𝐮𝐩❗");
-
-        // Get group metadata
-        const groupMetadata = await conn.groupMetadata(from);
-        const groupName = groupMetadata.subject;
-        const groupAdmins = groupMetadata.participants.filter(member => member.admin);
-        const memberCount = groupMetadata.participants.length;
-        const adminList = groupAdmins.map(admin => `│ ∘  @${admin.id.split('@')[0]}`).join("\n") || "│ ∘ No admins";
-
-        // Format the output
-        let textt = `
-╭───「 ᴀʟɪ ᴍᴅ 」───◆  
-│ ∘ ɢʀᴏᴜᴘ: ${groupName}  
-│ ∘ ɢʀᴏᴜᴘ ɪᴅ: ${from}  
-│ ∘ ᴛᴏᴛᴀʟ ᴍᴇᴍʙᴇʀs: ${memberCount}  
-│ ∘ ─────────────────  
-${adminList}
-`;
-
-        // Send the group information
-        await conn.sendMessage(from, {
-            text: textt,
-            mentions: groupAdmins.map(a => a.id),
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.error("Error in ginfo command:", error);
-        reply("An error occurred while retrieving the group information.");
     }
 });
 
@@ -761,5 +658,3 @@ cmd({
         reply(`❌ Failed to update group profile picture: ${e.message}`);
     }
 });
-
-*/
