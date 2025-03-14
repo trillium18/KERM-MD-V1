@@ -288,12 +288,12 @@ async (conn, mek, m, { from, args, isOwner, reply }) => {
     // Check the argument for enabling or disabling the anticall feature
     if (args[0] === "on") {
         config.AUTO_REACT = "true";
-        await reply("*autoreact feature is now enabled.*");
+        await reply("autoreact feature is now enabled.");
     } else if (args[0] === "off") {
         config.AUTO_REACT = "false";
         await reply("autoreact feature is now disabled.");
     } else {
-        await reply(`*🫟 ᴇxᴀᴍᴘʟᴇ: .ᴀᴜᴛᴏ-ʀᴇᴀᴄᴛ ᴏɴ*`);
+        await reply(`*🔥 ᴇxᴀᴍᴘʟᴇ: .ᴀᴜᴛᴏ-ʀᴇᴀᴄᴛ ᴏɴ*`);
     }
 });
 //--------------------------------------------
