@@ -9,82 +9,79 @@ ANYWAY, YOU MUST GIVE CREDIT TO MY CODE WHEN COPY IT
 CONTACT ME HERE +237656520674
 YT: KermHackTools
 Github: Kgtech-cmr
-*/
+*/ 
 
 const axios = require('axios');
 const config = require('../config');
-const { cmd } = require('../command');
-
-// Fonction utilitaire pour télécharger le média
-async function downloadMedia(messageMedia, client) {
-  if (typeof client.downloadAndSaveMediaMessage === 'function') {
-    return client.downloadAndSaveMediaMessage(messageMedia);
-  } else if (typeof client.downloadMediaMessage === 'function') {
-    return client.downloadMediaMessage(messageMedia);
-  } else {
-    throw new Error("Aucune fonction de téléchargement de média n'est disponible sur le client.");
-  }
-}
+const { cmd, commands } = require('../command');
+const msg = require('../lib/msg');
 
 cmd({
   'pattern': 'vv',
   'react': '📲',
   'alias': ['retrive', 'viewonce'],
-  'desc': "Récupère et renvoie le contenu d'un message ViewOnce (image/vidéo/audio).",
+  'desc': "Fetch and resend a ViewOnce message content (image/video/voice).",
   'category': 'misc',
   'use': "<query>",
   'filename': __filename
 }, async (client, message, args, { from, reply }) => {
   try {
-    console.log("Message reçu :", message);
+    console.log("Received message:", message);
 
     // Vérifier si un message cité est présent
     const quotedMessage = message.msg?.contextInfo?.quotedMessage || message.quoted?.message;
     if (!quotedMessage) {
-      return reply("⚠️ Veuillez répondre à un message *ViewOnce*.");
+      return reply("⚠️ Please reply to a message *ViewOnce*.");
     }
-    console.log("Message cité trouvé :", quotedMessage);
 
-    // Vérifier que le message cité est bien un message ViewOnce
+    console.log("Quoted message found:", quotedMessage);
+
+    // Vérifier si c'est un message ViewOnce
     const viewOnceContent = quotedMessage.viewOnceMessageV2 || quotedMessage.viewOnceMessage;
-    if (!viewOnceContent || !viewOnceContent.message) {
-      return reply("⚠️ Ce message n'est pas un message *ViewOnce*.");
+    if (!viewOnceContent) {
+      return reply("⚠️ This message is not a *ViewOnce*.");
     }
-    console.log("Contenu ViewOnce trouvé :", viewOnceContent);
 
-    // Traitement selon le type de média
-    if (viewOnceContent.message.imageMessage) {
+    console.log("ViewOnce content found:", viewOnceContent);
+
+    // Détection du type de message et récupération du média
+    if (viewOnceContent.message?.imageMessage) {
       let caption = viewOnceContent.message.imageMessage.caption || "📷 Image ViewOnce";
-      let mediaData = await downloadMedia(viewOnceContent.message.imageMessage, client);
-      console.log("Image téléchargée");
+      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.imageMessage);
+      console.log("Image downloaded to:", mediaPath);
+
       return client.sendMessage(from, {
-        image: mediaData,
+        image: { url: mediaPath },
         caption: caption
       }, { quoted: message });
     }
-    
-    if (viewOnceContent.message.videoMessage) {
+
+    if (viewOnceContent.message?.videoMessage) {
       let caption = viewOnceContent.message.videoMessage.caption || "🎥 Vidéo ViewOnce";
-      let mediaData = await downloadMedia(viewOnceContent.message.videoMessage, client);
-      console.log("Vidéo téléchargée");
+      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.videoMessage);
+      console.log("Video downloaded to:", mediaPath);
+
       return client.sendMessage(from, {
-        video: mediaData,
+        video: { url: mediaPath },
         caption: caption
       }, { quoted: message });
     }
-    
-    if (viewOnceContent.message.audioMessage) {
-      let mediaData = await downloadMedia(viewOnceContent.message.audioMessage, client);
-      console.log("Audio téléchargé");
+
+    if (viewOnceContent.message?.audioMessage) {
+      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.audioMessage);
+      console.log("Audio downloaded to:", mediaPath);
+
       return client.sendMessage(from, {
-        audio: mediaData
+        audio: { url: mediaPath }
       }, { quoted: message });
     }
-    
-    return reply("⚠️ Ce type de message *ViewOnce* n'est pas supporté.");
-    
+
+    return reply("⚠️ This type of message *ViewOnce* is not supported.");
+
   } catch (error) {
-    console.error("Erreur lors de la récupération du message ViewOnce :", error);
-    return reply(`❌ Une erreur est survenue lors de la récupération du message *ViewOnce* : ${error.message || error}`);
+    console.error("Error fetching ViewOnce message:", error);
+    reply("❌ An error occurred while retrieving the message *ViewOnce*.");
   }
 });
+
+Je vais te fournir un autre code, pour que tu adaptes les bases à celui 
