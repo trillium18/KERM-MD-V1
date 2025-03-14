@@ -83,5 +83,3 @@ cmd({
     reply("❌ An error occurred while retrieving the message *ViewOnce*.");
   }
 });
-
-Je vais te fournir un autre code, pour que tu adaptes les bases à celui 
