@@ -35,18 +35,10 @@ cmd({
 
     console.log("Quoted message found:", quotedMessage);
 
-    // Vérifier si c'est un message ViewOnce
-    const viewOnceContent = quotedMessage.viewOnceMessageV2 || quotedMessage.viewOnceMessage;
-    if (!viewOnceContent) {
-      return reply("⚠️ This message is not a *ViewOnce*.");
-    }
-
-    console.log("ViewOnce content found:", viewOnceContent);
-
-    // Détection du type de message et récupération du média
-    if (viewOnceContent.message?.imageMessage) {
-      let caption = viewOnceContent.message.imageMessage.caption || "📷 Image ViewOnce";
-      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.imageMessage);
+    // Détection du type de message
+    if (quotedMessage.imageMessage) {
+      let caption = quotedMessage.imageMessage.caption || "📷 Image ViewOnce";
+      let mediaPath = await client.downloadAndSaveMediaMessage(quotedMessage.imageMessage);
       console.log("Image downloaded to:", mediaPath);
 
       return client.sendMessage(from, {
@@ -55,9 +47,9 @@ cmd({
       }, { quoted: message });
     }
 
-    if (viewOnceContent.message?.videoMessage) {
-      let caption = viewOnceContent.message.videoMessage.caption || "🎥 Vidéo ViewOnce";
-      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.videoMessage);
+    if (quotedMessage.videoMessage) {
+      let caption = quotedMessage.videoMessage.caption || "🎥 Video ViewOnce";
+      let mediaPath = await client.downloadAndSaveMediaMessage(quotedMessage.videoMessage);
       console.log("Video downloaded to:", mediaPath);
 
       return client.sendMessage(from, {
@@ -66,8 +58,8 @@ cmd({
       }, { quoted: message });
     }
 
-    if (viewOnceContent.message?.audioMessage) {
-      let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.audioMessage);
+    if (quotedMessage.audioMessage) {
+      let mediaPath = await client.downloadAndSaveMediaMessage(quotedMessage.audioMessage);
       console.log("Audio downloaded to:", mediaPath);
 
       return client.sendMessage(from, {
