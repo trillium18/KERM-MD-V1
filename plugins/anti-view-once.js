@@ -13,7 +13,18 @@ Github: Kgtech-cmr
 
 const axios = require('axios');
 const config = require('../config');
-const { cmd, commands } = require('../command');
+const { cmd } = require('../command');
+
+// Fonction utilitaire pour télécharger le média
+async function downloadMedia(messageMedia, client) {
+  if (typeof client.downloadAndSaveMediaMessage === 'function') {
+    return client.downloadAndSaveMediaMessage(messageMedia);
+  } else if (typeof client.downloadMediaMessage === 'function') {
+    return client.downloadMediaMessage(messageMedia);
+  } else {
+    throw new Error("Aucune fonction de téléchargement de média n'est disponible sur le client.");
+  }
+}
 
 cmd({
   'pattern': 'vv',
@@ -32,7 +43,6 @@ cmd({
     if (!quotedMessage) {
       return reply("⚠️ Veuillez répondre à un message *ViewOnce*.");
     }
-
     console.log("Message cité trouvé :", quotedMessage);
 
     // Vérifier que le message cité est bien un message ViewOnce
@@ -40,40 +50,37 @@ cmd({
     if (!viewOnceContent || !viewOnceContent.message) {
       return reply("⚠️ Ce message n'est pas un message *ViewOnce*.");
     }
-
     console.log("Contenu ViewOnce trouvé :", viewOnceContent);
 
     // Traitement selon le type de média
     if (viewOnceContent.message.imageMessage) {
       let caption = viewOnceContent.message.imageMessage.caption || "📷 Image ViewOnce";
-      // Téléchargement du média via downloadMediaMessage qui renvoie un buffer
-      let mediaBuffer = await client.downloadMediaMessage(viewOnceContent.message.imageMessage);
+      let mediaData = await downloadMedia(viewOnceContent.message.imageMessage, client);
       console.log("Image téléchargée");
       return client.sendMessage(from, {
-        image: mediaBuffer,
+        image: mediaData,
         caption: caption
       }, { quoted: message });
     }
     
     if (viewOnceContent.message.videoMessage) {
       let caption = viewOnceContent.message.videoMessage.caption || "🎥 Vidéo ViewOnce";
-      let mediaBuffer = await client.downloadMediaMessage(viewOnceContent.message.videoMessage);
+      let mediaData = await downloadMedia(viewOnceContent.message.videoMessage, client);
       console.log("Vidéo téléchargée");
       return client.sendMessage(from, {
-        video: mediaBuffer,
+        video: mediaData,
         caption: caption
       }, { quoted: message });
     }
     
     if (viewOnceContent.message.audioMessage) {
-      let mediaBuffer = await client.downloadMediaMessage(viewOnceContent.message.audioMessage);
+      let mediaData = await downloadMedia(viewOnceContent.message.audioMessage, client);
       console.log("Audio téléchargé");
       return client.sendMessage(from, {
-        audio: mediaBuffer
+        audio: mediaData
       }, { quoted: message });
     }
     
-    // Si le type de message ViewOnce n'est pas supporté
     return reply("⚠️ Ce type de message *ViewOnce* n'est pas supporté.");
     
   } catch (error) {
