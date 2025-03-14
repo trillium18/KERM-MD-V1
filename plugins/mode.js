@@ -1,36 +1,38 @@
-const { cmd } = require('../command');
 const fs = require('fs');
-const modeFile = __dirname + '../my_data/mode.json';
+const { cmd } = require('../command');
+const config = require('../config');
 
-// Charger le mode actuel depuis le fichier JSON
+const modeFile = '../my_data/mode.json';
+
+// Vérifier et charger le mode actuel depuis mode.json
 const getMode = () => {
-    if (!fs.existsSync(modeFile)) return "private"; // Par défaut : private
-    return JSON.parse(fs.readFileSync(modeFile, 'utf8')).mode || "private";
+    if (!fs.existsSync(modeFile)) {
+        fs.writeFileSync(modeFile, JSON.stringify({ mode: "private" }, null, 2));
+    }
+    const data = fs.readFileSync(modeFile, 'utf8');
+    return JSON.parse(data).mode;
 };
 
-// Sauvegarder le mode dans le fichier JSON
-const setMode = (newMode) => {
-    fs.writeFileSync(modeFile, JSON.stringify({ mode: newMode }, null, 2));
-};
-
-// Commande .mode
+// Commande pour changer le mode
 cmd({
     pattern: "mode",
-    desc: "Set the bot mode to private or public.",
+    desc: "Change bot mode (private/public).",
     category: "owner",
-    react: "🔄",
+    react: "⚙️",
     filename: __filename,
 }, async (conn, mek, m, { reply, args, isOwner }) => {
     if (!isOwner) return reply("❌ Only the owner can change the mode.");
 
-    const newMode = args[0]?.toLowerCase(); // Récupérer l'argument (private/public)
-
-    if (!newMode || !["private", "public"].includes(newMode)) {
-        return reply("❌ Please use `.mode private` or `.mode public`.");
+    const newMode = args[0]?.toLowerCase();
+    if (!["private", "public"].includes(newMode)) {
+        return reply("❌ Usage: .mode private | .mode public");
     }
 
-    // Sauvegarder le mode
-    setMode(newMode);
+    // Mettre à jour le mode dans mode.json
+    fs.writeFileSync(modeFile, JSON.stringify({ mode: newMode }, null, 2));
 
-    return reply(`✅ The bot is now in *${newMode.toUpperCase()}* mode.`);
+    return reply(`✅ Bot mode has been changed to *${newMode.toUpperCase()}*`);
 });
+
+// Mettre à jour `config.MODE` au démarrage
+config.MODE = getMode();
