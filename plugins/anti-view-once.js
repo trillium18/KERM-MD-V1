@@ -19,67 +19,68 @@ cmd({
   'pattern': 'vv',
   'react': '📲',
   'alias': ['retrive', 'viewonce'],
-  'desc': "Fetch and resend a ViewOnce message content (image/video/voice).",
+  'desc': "Récupère et renvoie le contenu d'un message ViewOnce (image/vidéo/audio).",
   'category': 'misc',
   'use': "<query>",
   'filename': __filename
 }, async (client, message, args, { from, reply }) => {
   try {
-    console.log("Received message:", message);
+    console.log("Message reçu :", message);
 
     // Vérifier si un message cité est présent
     const quotedMessage = message.msg?.contextInfo?.quotedMessage || message.quoted?.message;
     if (!quotedMessage) {
-      return reply("⚠️ Please reply to a *ViewOnce* message.");
+      return reply("⚠️ Veuillez répondre à un message *ViewOnce*.");
     }
 
-    console.log("Quoted message found:", quotedMessage);
+    console.log("Message cité trouvé :", quotedMessage);
 
-    // Vérifier si c'est un message *ViewOnce*
+    // Vérifier que le message cité est bien un message ViewOnce
     const viewOnceContent = quotedMessage.viewOnceMessageV2 || quotedMessage.viewOnceMessage;
     if (!viewOnceContent || !viewOnceContent.message) {
-      return reply("⚠️ This message is not a *ViewOnce* message.");
+      return reply("⚠️ Ce message n'est pas un message *ViewOnce*.");
     }
 
-    console.log("ViewOnce content found:", viewOnceContent);
+    console.log("Contenu ViewOnce trouvé :", viewOnceContent);
 
-    // Détection du type de message et récupération du média
+    // Traitement selon le type de média
     if (viewOnceContent.message.imageMessage) {
       let caption = viewOnceContent.message.imageMessage.caption || "📷 Image ViewOnce";
       let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.imageMessage);
-      console.log("Image downloaded to:", mediaPath);
+      console.log("Image téléchargée à :", mediaPath);
 
       return client.sendMessage(from, {
         image: { url: mediaPath },
         caption: caption
       }, { quoted: message });
     }
-
+    
     if (viewOnceContent.message.videoMessage) {
-      let caption = viewOnceContent.message.videoMessage.caption || "🎥 Video ViewOnce";
+      let caption = viewOnceContent.message.videoMessage.caption || "🎥 Vidéo ViewOnce";
       let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.videoMessage);
-      console.log("Video downloaded to:", mediaPath);
+      console.log("Vidéo téléchargée à :", mediaPath);
 
       return client.sendMessage(from, {
         video: { url: mediaPath },
         caption: caption
       }, { quoted: message });
     }
-
+    
     if (viewOnceContent.message.audioMessage) {
       let mediaPath = await client.downloadAndSaveMediaMessage(viewOnceContent.message.audioMessage);
-      console.log("Audio downloaded to:", mediaPath);
+      console.log("Audio téléchargé à :", mediaPath);
 
       return client.sendMessage(from, {
         audio: { url: mediaPath }
       }, { quoted: message });
     }
-
-    // Si le type de message *ViewOnce* n'est pas supporté
-    return reply("⚠️ Sorry, this *ViewOnce* message type is not supported yet.");
-
+    
+    // Si le type de message ViewOnce n'est pas supporté
+    return reply("⚠️ Ce type de message *ViewOnce* n'est pas supporté.");
+    
   } catch (error) {
-    console.error("Error fetching ViewOnce message:", error);
-    reply("❌ An error occurred while retrieving the *ViewOnce* message.");
+    console.error("Erreur lors de la récupération du message ViewOnce :", error);
+    // Affichage détaillé de l'erreur pour le débogage (peut être retiré en production)
+    return reply(`❌ Une erreur est survenue lors de la récupération du message *ViewOnce* : ${error.message || error}`);
   }
 });
