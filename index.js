@@ -234,13 +234,6 @@ if (!isReact && senderNumber === botNumber) {
     }
 }        
 //=================================WORKTYPE=========================================== 
-const modeFile = './my_data/mode.json';
-if (fs.existsSync(modeFile)) {
-    const modeData = JSON.parse(fs.readFileSync(modeFile, 'utf8'));
-    config.MODE = modeData.mode || "private";
-}
-
-// Vérification du mode avant d'exécuter une commande
 if (!isOwner && config.MODE === "private") return;
 if (!isOwner && isGroup && config.MODE === "inbox") return;
 if (!isOwner && isGroup && config.MODE === "groups") return;
