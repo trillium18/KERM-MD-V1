@@ -21,7 +21,7 @@ function convertToBool(text, fault = 'true') {
 module.exports = {
 SESSION_ID: process.env.SESSION_ID || "PUT YOUR SESSION ID HERE",
 AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "true",
-MODE: require('..my_data/mode.json').mode || "private"
+MODE: require('..my_data/mode.json').mode || "private",
 AUTO_VOICE: process.env.AUTO_VOICE || "false",
 AUTO_STICKER: process.env.AUTO_STICKER || "false",
 AUTO_REPLY: process.env.AUTO_REPLY || "false",
