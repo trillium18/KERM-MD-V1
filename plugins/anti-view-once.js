@@ -27,19 +27,21 @@ cmd(
   async (bot, message, args, { from, quoted, reply }) => {
     let filePath;
     try {
-      // Récupère le message contenant le média (soit cité, soit le message lui-même)
+      // Retrieve the media message (either quoted or the current one)
       const mediaMessage = quoted || message;
       if (!mediaMessage || !mediaMessage.message) {
         return reply('Please reply to a media message');
       }
 
-      // Déplier le message s'il est encapsulé dans un message éphémère
+      // Unwrap the message in case it's ephemeral or view-once
       let messageContent = mediaMessage.message;
       if (messageContent.ephemeralMessage) {
         messageContent = messageContent.ephemeralMessage.message;
+      } else if (messageContent.viewOnceMessage) {
+        messageContent = messageContent.viewOnceMessage.message;
       }
 
-      // Extraire le contenu média (image, vidéo ou document)
+      // Extract media content (image, video, or document)
       const mediaContent =
         messageContent.imageMessage ||
         messageContent.videoMessage ||
@@ -49,17 +51,15 @@ cmd(
         return reply('Please reply to a media message');
       }
 
-      // Télécharger le fichier média
+      // Download the media file
       filePath = await downloadAndSaveMediaMessage(mediaMessage, {});
-      if (!filePath) {
-        return reply('Failed to download media');
-      }
+      if (!filePath) return reply('Failed to download media');
 
-      // Déterminer le type de média et récupérer la légende
+      // Determine media type and get caption if available
       const isImage = mediaContent.mimetype.startsWith('image/');
       const caption = mediaContent.caption || '';
 
-      // Envoyer le média avec la légende d'origine
+      // Resend the media with the original caption
       await bot.sendMessage(
         from,
         {
@@ -74,7 +74,7 @@ cmd(
       console.error('Save error:', error);
       reply('Failed to save media. Please try again.');
     } finally {
-      // Nettoyer le fichier temporaire si il existe
+      // Clean up the temporary file if it exists
       if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
