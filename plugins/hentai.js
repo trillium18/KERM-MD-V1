@@ -2,7 +2,7 @@ const { cmd, commands } = require('../command');
 const axios = require('axios');
 
 cmd({
-    pattern: "anime",
+    pattern: "hentai",
     desc: "Sends a random hentai video.",
     category: "anime",
     filename: __filename,
