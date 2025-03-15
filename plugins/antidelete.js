@@ -1,4 +1,3 @@
-/*
 const { cmd } = require('../command');
 const fs = require('fs');
 const path = require('path');
@@ -35,17 +34,34 @@ cmd({
     react: "🔄",
     desc: "Activate or deactivate anti-delete mode.",
     category: "admin",
-    use: ".antidelete",
+    use: ".antidelete [on/off]",
     filename: __filename
-}, async (conn, mek, m, { from, sender, reply }) => {
-    if (!antiDeleteList[sender]) {
-        antiDeleteList[sender] = true;
-        reply("✅ Anti-delete mode activated. Deleted messages will be sent to your private chat.");
-    } else {
-        delete antiDeleteList[sender];
-        reply("❌ Anti-delete mode deactivated.");
+}, async (conn, mek, m, { from, sender, reply, args }) => {
+    if (args.length === 0) {
+        return reply("❌ Please specify 'on' to activate or 'off' to deactivate the anti-delete mode.\nExample: .antidelete on or .antidelete off");
     }
-    saveAntiDelete();
+
+    const action = args[0].toLowerCase();
+
+    if (action === "on") {
+        if (!antiDeleteList[sender]) {
+            antiDeleteList[sender] = true;
+            reply("✅ Anti-delete mode activated. Deleted messages will be sent to your private chat.");
+            saveAntiDelete();
+        } else {
+            reply("❌ Anti-delete mode is already activated.");
+        }
+    } else if (action === "off") {
+        if (antiDeleteList[sender]) {
+            delete antiDeleteList[sender];
+            reply("❌ Anti-delete mode deactivated.");
+            saveAntiDelete();
+        } else {
+            reply("❌ Anti-delete mode is not activated.");
+        }
+    } else {
+        reply("❌ Invalid argument. Please specify 'on' or 'off'. Example: .antidelete on or .antidelete off");
+    }
 });
 
 // Detect and recover deleted messages
@@ -81,7 +97,7 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
         if (!originalMessage) return;
 
         // Format date and time
-        let timestamp = moment().tz("Africa/Douala").format("DD/MM/YYYY HH:mm:ss");
+        let timestamp = moment().tz("Africa/Abidjan").format("DD/MM/YYYY HH:mm:ss");
 
         // Define who will receive the notification
         let userJid = messageFrom.includes("@g.us") ? senderJid : messageFrom;
@@ -103,4 +119,4 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
         console.error("❌ Error recovering deleted message:", error);
     }
 });
-*/
+                
