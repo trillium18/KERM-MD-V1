@@ -1,29 +1,33 @@
 const { cmd } = require('../command');
 const fs = require('fs');
-const path = require("path");
+const path = require('path');
 
-// Load sudo users list from a JSON file
-const sudoFile = './sudo.json';
-let sudoUsers = [];
+const sudoFile = path.join(__dirname, './sudo.json');
 
-try {
+// Function to read the sudo users from the JSON file
+function getSudoUsers() {
+  try {
     if (fs.existsSync(sudoFile)) {
-        sudoUsers = JSON.parse(fs.readFileSync(sudoFile));
+      return JSON.parse(fs.readFileSync(sudoFile, 'utf-8'));
+    } else {
+      return [];
     }
-} catch (error) {
-    console.error("Error loading sudo users:", error);
+  } catch (error) {
+    console.error("Error reading sudo users:", error);
+    return [];
+  }
 }
 
 cmd({
     pattern: "examplecmd",
-    desc: "An example command for owner and sudo users.",
+    desc: "Example command for owner/sudo users.",
     category: "admin",
     filename: __filename,
 }, async (conn, mek, m, { sender, isOwner, reply }) => {
-    // Determine if the sender is owner or a sudo user.
-    let isSudo = isOwner || sudoUsers.includes(sender.split('@')[0]);
+    // Relire la liste des sudo users à chaque exécution
+    const currentSudoUsers = getSudoUsers();
+    // Vérifier si le sender est owner ou dans la liste des sudo users
+    let isSudo = isOwner || currentSudoUsers.includes(sender.split('@')[0]);
     if (!isSudo) return reply("❌ Only the owner or a sudo user can use this command.");
-
-    // Place here the code of the command
-    reply("✅ You are authorized to run this command.");
+    reply("✅ You are authorized to use this command.");
 });
