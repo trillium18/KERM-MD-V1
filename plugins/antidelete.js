@@ -1,4 +1,4 @@
-const { cmd } = require('../command');
+/*const { cmd } = require('../command');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment-timezone');
@@ -101,4 +101,4 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
     } catch (error) {
         console.error("❌ Error recovering deleted message:", error);
     }
-});
+});*/
