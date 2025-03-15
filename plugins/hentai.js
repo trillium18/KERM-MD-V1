@@ -2,7 +2,7 @@ const { cmd, commands } = require('../command');
 const axios = require('axios');
 
 cmd({
-    pattern: "hentai",
+    pattern: "anime",
     desc: "Sends a random hentai video.",
     category: "anime",
     filename: __filename,
@@ -11,7 +11,7 @@ cmd({
         const response = await axios.get("https://apis.davidcyriltech.my.id/hentai");
         if (!response.data) return reply("❌ No response from API.");
         
-        const data = response.data.data;
+        const data = response.data;
         if (!data) return reply("❌ No data found.");
         
         if (data.type !== 'mp4') {
@@ -19,8 +19,7 @@ cmd({
         }
         
         const caption = `🎥 *Title:* ${data.title}\n📂 *Category:* ${data.category}\n📤 *Shares:* ${data.share_count}\n👀 *Views:* ${data.views_count}\n📽️ *Type:* ${data.type}`;
-        
-        await conn.sendMessage(m.chat, { video: { url: data.video }, caption: caption }, { quoted: m });
+        await conn.sendMessage(m.chat, { video: { url: data.video }, caption }, { quoted: m });
     } catch (error) {
         console.error(error);
         reply("⚠️ An error occurred: " + error.message);
