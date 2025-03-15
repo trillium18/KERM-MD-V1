@@ -3,7 +3,7 @@ const config = require('../config');
 const fs = require('fs');
 
 // Load sudo users list from a JSON file
-const sudoFile = './sudo.json';
+const sudoFile = '../my_data/sudo.json';
 let sudoUsers = [];
 
 try {
