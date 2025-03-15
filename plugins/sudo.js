@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require("path");
 
 // Load sudo users list from a JSON file
-const sudoFile = '../my_data/sudo.json';
+const sudoFile = './sudo.json';
 let sudoUsers = [];
 
 try {
