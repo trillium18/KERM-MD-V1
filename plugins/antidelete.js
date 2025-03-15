@@ -46,21 +46,21 @@ cmd({
     if (action === "on") {
         if (!antiDeleteList[sender]) {
             antiDeleteList[sender] = true;
-            reply("✅ Anti-delete mode activated. Deleted messages will be sent to your private chat.");
+            await reply("✅ Anti-delete mode activated. Deleted messages will be sent to your private chat.");
             saveAntiDelete();
         } else {
-            reply("❌ Anti-delete mode is already activated.");
+            await reply("❌ Anti-delete mode is already activated.");
         }
     } else if (action === "off") {
         if (antiDeleteList[sender]) {
             delete antiDeleteList[sender];
-            reply("❌ Anti-delete mode deactivated.");
+            await reply("❌ Anti-delete mode deactivated.");
             saveAntiDelete();
         } else {
-            reply("❌ Anti-delete mode is not activated.");
+            await reply("❌ Anti-delete mode is not activated.");
         }
     } else {
-        reply("❌ Invalid argument. Please specify 'on' or 'off'. Example: .antidelete on or .antidelete off");
+        await reply("❌ Invalid argument. Please specify 'on' or 'off'. Example: .antidelete on or .antidelete off");
     }
 });
 
@@ -119,4 +119,4 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
         console.error("❌ Error recovering deleted message:", error);
     }
 });
-                
+
