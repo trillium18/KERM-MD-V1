@@ -1,80 +1,88 @@
 const { cmd } = require('../command');
-const config = require('../config');
 const fs = require('fs');
+const path = require('path');
 
-// Charger la liste des sudo users depuis un fichier JSON
-const sudoFile = '../my_data/sudo.json';
+const sudoFile = path.join(__dirname, 'sudo.json');
 let sudoUsers = [];
 
+// Load sudo users from sudo.json
 try {
     if (fs.existsSync(sudoFile)) {
-        sudoUsers = JSON.parse(fs.readFileSync(sudoFile));
+        const data = fs.readFileSync(sudoFile, 'utf-8').trim();
+        sudoUsers = data ? JSON.parse(data) : [];
+        console.log("✅ Sudo users loaded:", sudoUsers);
     }
 } catch (error) {
-    console.error("Erreur lors du chargement des sudo users:", error);
+    console.error("❌ Error loading sudo.json:", error);
+    sudoUsers = [];
 }
 
-// Sauvegarder la liste des sudo users
+// Save sudo users to sudo.json
 const saveSudoUsers = () => {
-    fs.writeFileSync(sudoFile, JSON.stringify(sudoUsers, null, 2));
+    try {
+        fs.writeFileSync(sudoFile, JSON.stringify(sudoUsers, null, 2), 'utf-8');
+        console.log("✅ Sudo users updated.");
+    } catch (error) {
+        console.error("❌ Error saving sudo users:", error);
+    }
 };
 
-// Ajouter un sudo user
+// Add a sudo user
 cmd({
     pattern: "setsudo",
     react: "🔧",
-    desc: "Ajoute un utilisateur en tant que sudo.",
+    desc: "Adds a user as a sudo admin.",
     category: "admin",
-    use: ".setsudo (numéro ou réponse à un message)",
+    use: ".setsudo (number or reply to a message)",
     filename: __filename
 }, async (conn, mek, m, { from, args, q, reply, sender, isOwner, quoted }) => {
-    if (!isOwner) return reply("❌ Seul le propriétaire peut ajouter un sudo user.");
+    if (!isOwner) return reply("❌ Only the owner can add sudo users.");
 
     let number = q || (quoted ? quoted.sender : null);
-    if (!number) return reply("❌ Veuillez fournir un numéro ou répondre à un message.");
+    if (!number) return reply("❌ Please provide a number or reply to a message.");
 
-    number = number.replace(/[^0-9]/g, ""); // Nettoyer le numéro
+    number = number.replace(/[^0-9]/g, ""); // Clean the number
 
-    if (sudoUsers.includes(number)) return reply("✅ Cet utilisateur est déjà sudo.");
+    if (sudoUsers.includes(number)) return reply("✅ This user is already a sudo.");
 
     sudoUsers.push(number);
     saveSudoUsers();
-    reply(`✅ ${number} a été ajouté comme sudo user.`);
+    reply(`✅ ${number} has been added as a sudo user.`);
 });
 
-// Supprimer un sudo user
+// Remove a sudo user
 cmd({
     pattern: "delsudo",
     react: "🗑️",
-    desc: "Supprime un utilisateur de la liste sudo.",
+    desc: "Removes a user from the sudo list.",
     category: "admin",
-    use: ".delsudo (numéro)",
+    use: ".delsudo (number)",
     filename: __filename
 }, async (conn, mek, m, { from, args, q, reply, sender, isOwner }) => {
-    if (!isOwner) return reply("❌ Seul le propriétaire peut supprimer un sudo user.");
+    if (!isOwner) return reply("❌ Only the owner can remove sudo users.");
 
-    let number = q.replace(/[^0-9]/g, ""); // Nettoyer le numéro
-    if (!number) return reply("❌ Veuillez fournir un numéro.");
+    let number = q ? q.replace(/[^0-9]/g, "") : "";
+    if (!number) return reply("❌ Please provide a number.");
 
-    if (!sudoUsers.includes(number)) return reply("❌ Cet utilisateur n'est pas sudo.");
+    if (!sudoUsers.includes(number)) return reply("❌ This user is not a sudo.");
 
     sudoUsers = sudoUsers.filter(user => user !== number);
     saveSudoUsers();
-    reply(`✅ ${number} a été retiré de la liste des sudo users.`);
+    reply(`✅ ${number} has been removed from the sudo list.`);
 });
 
-// Afficher la liste des sudo users
+// Show the sudo users list
 cmd({
     pattern: "getsudo",
     react: "📜",
-    desc: "Affiche la liste des sudo users.",
+    desc: "Displays the list of sudo users.",
     category: "admin",
     use: ".getsudo",
     filename: __filename
 }, async (conn, mek, m, { from, reply, sender }) => {
-    if (sudoUsers.length === 0) return reply("🚫 Aucun sudo user enregistré.");
+    if (sudoUsers.length === 0) return reply("🚫 No sudo users registered.");
 
-    let list = "🌟 *Liste des sudo users* 🌟\n\n";
+    let list = "🌟 *Sudo Users List* 🌟\n\n";
     sudoUsers.forEach((user, index) => {
         list += `${index + 1}. +${user}\n`;
     });
