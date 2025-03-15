@@ -30,6 +30,10 @@ ALIVE_MSG: process.env.ALIVE_MSG || "_Hi 💁🏽 How Can I Assist You. Am alive
 ANTI_LINK: process.env.ANTI_LINK || "true",
 ANTI_BAD: process.env.ANTI_BAD || "true",
 PREFIX: process.env.PREFIX || ".",
+SUDO_NUMBERS: (process.env.SUDO_NUMBERS || "237659535227,233333333333")  
+    .split(",")  
+    .map(num => num.trim())  
+    .filter(num => /^[0-9]+$/.test(num)),  
 FAKE_RECORDING: process.env.FAKE_RECORDING || "false",
 FAKE_TYPING: process.env.FAKE_TYPING || "false",
 ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "true",
