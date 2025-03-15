@@ -1,4 +1,4 @@
-const { cmd } = require('../command');
+const { cmd, conn } = require('../command');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment-timezone');
@@ -38,7 +38,7 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, sender, reply, args }) => {
     if (args.length === 0) {
-        return reply("❌ Please specify 'on' to activate or 'off' to deactivate the anti-delete mode.\nExample: .antidelete on or .antidelete off");
+        return await reply("❌ Please specify 'on' to activate or 'off' to deactivate the anti-delete mode.\nExample: .antidelete on or .antidelete off");
     }
 
     const action = args[0].toLowerCase();
@@ -119,4 +119,4 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
         console.error("❌ Error recovering deleted message:", error);
     }
 });
-  
+
