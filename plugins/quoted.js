@@ -1,5 +1,4 @@
 
-const axios = require("axios");
 const { cmd } = require("../command");
 const { forwardMessage } = require('../lib/msg');
 const { proto } = require('@whiskeysockets/baileys');
