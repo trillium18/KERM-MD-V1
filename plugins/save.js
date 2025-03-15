@@ -52,14 +52,14 @@ cmd({
     // Préparer l'objet de réponse
     const mediaMessage = {
       caption: q || "",
+      [mediaType]: { url: "file://" + resolvedFilePath }
     };
-    mediaMessage[mediaType] = { url: "file://" + resolvedFilePath };
 
     // Envoyer le fichier au contact
     await bot.sendMessage(chat.sender, mediaMessage, { quoted: message });
     await reply("✅ Successfully saved and sent the media file.");
   } catch (error) {
     console.error(error);
-    reply("❌ Failed to save and send the media. Please try again.");
+    await reply("❌ Failed to save and send the media. Please try again.");
   }
 });
