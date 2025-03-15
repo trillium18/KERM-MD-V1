@@ -79,34 +79,25 @@ cmd({
 });
 
 // Execute the command associated with a sticker
-conn.ev.on('messages.upsert', async (chatUpdate) => {
+conn.ev.on('message', async (message) => {
   try {
-    if (!chatUpdate.messages) return;
-    const m = chatUpdate.messages[0];
-
-    if (!m.message || !m.key || !m.key.remoteJid) return;
+    if (!message.message || !message.key || !message.key.remoteJid) return;
 
     // Check if a sticker has been sent
-    if (m.message.stickerMessage) {
-      const stickerKey = m.message.stickerMessage.mediaKey;
+    if (message.message.stickerMessage) {
+      const stickerKey = message.message.stickerMessage.mediaKey;
       const command = stickerCommands[stickerKey];
       if (command) {
         // Execute the command associated with the sticker
-        await cmd({
-          pattern: command,
-          react: '🔁',
-          desc: `Command associated with the sticker: ${command}`,
-          category: 'misc',
-          use: `.${command}`,
-          filename: __filename
-        }, async (conn, mek, m, { from, sender, reply, args }) => {
-          // Command logic here
-          await reply(`Executing command: ${command}`);
-        });
+        await cmd.callCommand(
+          command,
+          { from: message.key.remoteJid, sender: message.key.participant },
+          message
+        );
       }
     }
   } catch (error) {
     console.error('❌ Error executing the sticker command:', error);
   }
 });
-    
+
