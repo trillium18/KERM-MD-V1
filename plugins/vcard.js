@@ -11,4 +11,51 @@ YT: KermHackTools
 Github: Kgtech-cmr
 */
 
-const _0x589c8e=_0x2ada;function _0x2ada(_0x23782f,_0x5a79f6){const _0x3dfed4=_0x3dfe();return _0x2ada=function(_0x2ada5f,_0x2f11ec){_0x2ada5f=_0x2ada5f-0x136;let _0x3f5be8=_0x3dfed4[_0x2ada5f];return _0x3f5be8;},_0x2ada(_0x23782f,_0x5a79f6);}(function(_0x1bb962,_0x110a37){const _0x38c857=_0x2ada,_0x5ac58f=_0x1bb962();while(!![]){try{const _0x782226=parseInt(_0x38c857(0x14d))/0x1+parseInt(_0x38c857(0x139))/0x2*(parseInt(_0x38c857(0x13d))/0x3)+-parseInt(_0x38c857(0x141))/0x4+parseInt(_0x38c857(0x151))/0x5*(-parseInt(_0x38c857(0x147))/0x6)+parseInt(_0x38c857(0x13e))/0x7*(-parseInt(_0x38c857(0x14e))/0x8)+-parseInt(_0x38c857(0x138))/0x9+parseInt(_0x38c857(0x136))/0xa;if(_0x782226===_0x110a37)break;else _0x5ac58f['push'](_0x5ac58f['shift']());}catch(_0x11b0a4){_0x5ac58f['push'](_0x5ac58f['shift']());}}}(_0x3dfe,0x3ead1));const {cmd}=require(_0x589c8e(0x146));cmd({'pattern':_0x589c8e(0x144),'react':'🎫','desc':_0x589c8e(0x142),'category':_0x589c8e(0x13f),'filename':__filename},async(_0x3a0011,_0x2c7038,_0x456eeb,{quoted:_0x2714b6,args:_0x5111f1,reply:_0x266c14})=>{const _0x1dbc2c=_0x589c8e;try{if(!_0x5111f1||_0x5111f1[_0x1dbc2c(0x150)]===0x0)return _0x266c14(_0x1dbc2c(0x13b));if(!_0x2714b6)return _0x266c14(_0x1dbc2c(0x140));const _0x51d096=_0x2714b6[_0x1dbc2c(0x14c)]||_0x2714b6[_0x1dbc2c(0x13c)];if(!_0x51d096)return _0x266c14(_0x1dbc2c(0x137));const _0x2228d4=_0x51d096[_0x1dbc2c(0x14a)](/[@s.whatsapp.net]/g,''),_0x5b2584=_0x5111f1[_0x1dbc2c(0x14f)]('\x20'),_0x357ea8=_0x1dbc2c(0x13a)+_0x5b2584+_0x1dbc2c(0x143)+_0x2228d4+':'+_0x2228d4+_0x1dbc2c(0x145);await _0x3a0011[_0x1dbc2c(0x14b)](_0x456eeb[_0x1dbc2c(0x149)],{'contacts':{'displayName':_0x5b2584,'contacts':[{'vcard':_0x357ea8}]}});}catch(_0x5ba9a4){_0x266c14(_0x1dbc2c(0x148));}});function _0x3dfe(){const _0x4bce5b=['sender','345098mjgXVE','2745544DQhFAQ','join','length','45huQmnB','5898590bwZJZd','❌\x20*Phone\x20Number\x20Not\x20Found!*\x0a\x0a➤\x20The\x20bot\x20was\x20unable\x20to\x20extract\x20the\x20phone\x20number\x20from\x20the\x20replied\x20message.\x0a➤\x20Try\x20replying\x20to\x20a\x20valid\x20user\x20message.','372726nvYQHX','1322CaHJox','BEGIN:VCARD\x0aVERSION:3.0\x0aFN:','❌\x20*Invalid\x20format!*\x0a\x0a➤\x20Usage:\x20`.vcard\x20<Name>`\x0a➤\x20Example:\x20`.vcard\x20Lord\x20Kerm`\x0a\x0aℹ️\x20You\x20must\x20provide\x20a\x20name\x20for\x20the\x20contact.','participant','477OLPERl','7ibrOxZ','general','❌\x20*Missing\x20Reply!*\x0a\x0a➤\x20You\x20must\x20reply\x20to\x20a\x20user\x27s\x20message\x20to\x20create\x20their\x20contact.\x0a➤\x20Example:\x20Reply\x20to\x20a\x20user\x27s\x20message\x20and\x20type\x20`.vcard\x20Lord\x20Kerm`.','27652WqjEAy','Create\x20a\x20contact\x20card\x20(vCard)\x20from\x20a\x20replied\x20message.','\x0aTEL;type=CELL;waid=','vcard','\x0aEND:VCARD','../command','261210yalOWD','❌\x20*An\x20unexpected\x20error\x20occurred!*\x0a\x0a➤\x20Possible\x20reasons:\x0a1️⃣\x20WhatsApp\x20blocked\x20vCard\x20sending\x20temporarily.\x0a2️⃣\x20The\x20replied\x20message\x20doesn\x27t\x20contain\x20a\x20valid\x20number.\x0a3️⃣\x20A\x20bot\x20error\x20occurred.\x0a\x0a🔄\x20*Try\x20again\x20later\x20or\x20contact\x20the\x20bot\x20owner.*','chat','replace','sendMessage'];_0x3dfe=function(){return _0x4bce5b;};return _0x3dfe();}
+const { cmd } = require('../command');
+
+cmd(
+    {
+        pattern: "vcard",
+        desc: "Create a contact card (vCard) from a replied message.",
+        category: "general",
+        filename: __filename,
+    },
+    async (conn, mek, m, { quoted, args, reply }) => {
+        try {
+            // Check if the user provided a name
+            if (!args || args.length === 0) {
+                return reply("❌ *Invalid format!*\n\n➤ Usage: `.vcard <Name>`\n➤ Example: `.vcard Lord Kerm`\n\nℹ️ You must provide a name for the contact.");
+            }
+
+            // Check if the user replied to a message
+            if (!quoted) {
+                return reply("❌ *Missing Reply!*\n\n➤ You must reply to a user's message to create their contact.\n➤ Example: Reply to a user's message and type `.vcard Lord Kerm`.");
+            }
+
+            // Get the sender's number from the quoted message
+            const number = quoted.sender || quoted.participant;
+            if (!number) {
+                return reply("❌ *Phone Number Not Found!*\n\n➤ The bot was unable to extract the phone number from the replied message.\n➤ Try replying to a valid user message.");
+            }
+
+            // Format the phone number
+            const cleanNumber = number.replace(/[@s.whatsapp.net]/g, "");
+
+            // Get the contact name from arguments
+            const contactName = args.join(" ");
+
+            // Create the vCard format
+            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${contactName}\nTEL;type=CELL;waid=${cleanNumber}:${cleanNumber}\nEND:VCARD`;
+
+            // Send the vCard without any confirmation message
+            await conn.sendMessage(m.chat, {
+                contacts: {
+                    displayName: contactName,
+                    contacts: [{ vcard }]
+                }
+            });
+        } catch (error) {
+            reply("❌ *An unexpected error occurred!*\n\n➤ Possible reasons:\n1️⃣ WhatsApp blocked vCard sending temporarily.\n2️⃣ The replied message doesn't contain a valid number.\n3️⃣ A bot error occurred.\n\n🔄 *Try again later or contact the bot owner.*");
+        }
+    }
+);
