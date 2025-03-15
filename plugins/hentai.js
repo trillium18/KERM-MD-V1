@@ -5,6 +5,7 @@ const axios = require('axios');
 
 cmd({
   pattern: "hentai",
+  react: "🫦",
   desc: "Sends a random hentai video.",
   category: "anime",
   filename: __filename,
