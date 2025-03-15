@@ -1,3 +1,4 @@
+/*
 const { cmd } = require('../command');
 const fs = require('fs');
 const path = require('path');
@@ -102,3 +103,4 @@ conn.ev.on("messages.upsert", async (chatUpdate) => {
         console.error("❌ Error recovering deleted message:", error);
     }
 });
+*/
