@@ -70,15 +70,21 @@ cmd({
     desc: "Block a user.",
     category: "owner",
     react: "🚫",
-    filename: __filename
-},
-async (conn, mek, m, { from, isOwner, quoted, reply }) => {
+    filename: __filename,
+}, async (conn, mek, m, { isOwner, isGroup, quoted, reply }) => {
     if (!isOwner) return reply("❌ You are not the owner!");
-    if (!quoted) return reply("❌ Please reply to the user you want to block.");
-    const user = quoted.sender;
+
+    let user = "";
+    if (isGroup) {
+        if (!quoted) return reply("❌ In a group, please reply to the message of the participant you want to block.");
+        user = quoted.sender;
+    } else {
+        user = m.chat;
+    }
+
     try {
         await conn.updateBlockStatus(user, 'block');
-        reply(`🚫 User ${user} blocked successfully.`);
+        reply(`🚫 User @${user.split('@')[0]} blocked successfully.`, null, { mentions: [user] });
     } catch (error) {
         reply(`❌ Error blocking user: ${error.message}`);
     }
