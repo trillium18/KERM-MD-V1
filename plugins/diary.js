@@ -10,7 +10,7 @@ CONTACT ME HERE +237656520674
 YT: KermHackTools
 Github: Kgtech-cmr
 */
-/*
+
 const fs = require("fs");
 const path = require("path");
 const { cmd } = require("../command");
@@ -187,98 +187,4 @@ cmd({
     delete resetRequests[userId];
 
     reply("✅ Your diary password has been successfully reset!");
-});
-*/
-
-const fs = require("fs");
-const path = require("path");
-const { cmd } = require("../command");
-
-const diaryFile = path.join(__dirname, "../my_data/diary.json");
-
-// **Ensure the diary file exists and load it**
-if (!fs.existsSync(diaryFile)) {
-    fs.writeFileSync(diaryFile, JSON.stringify({}, null, 2)); // Create file if missing
-}
-
-let diaries = JSON.parse(fs.readFileSync(diaryFile, 'utf8'));
-
-// **Function to save diaries persistently**
-const saveDiaries = () => {
-    fs.writeFileSync(diaryFile, JSON.stringify(diaries, null, 2));
-};
-
-// **URL of diary image**
-const DIARY_IMG = "https://i.ibb.co/4Zq1jCNP/lordkerm.jpg";
-
-// **.diary Command (Open or Create Diary)**
-cmd({
-    pattern: "diary",
-    desc: "Open or create a secret diary (Owner only).",
-    category: "private",
-    filename: __filename
-}, async (conn, mek, m, { reply, q, from, isOwner, sender }) => {
-    if (!isOwner) return reply("❌ Only the bot owner can use this command.");
-    const userId = sender;
-
-    if (!diaries[userId]) {
-        if (!q) return reply("📖 No diary found. Create one using: `.diary yourpassword`.");
-        diaries[userId] = { password: q.trim(), entries: [] };
-        saveDiaries();
-        return reply("✅ Your secret diary has been created! Use `.setdiary your message` to add an entry.");
-    }
-
-    if (!q) return reply("🔒 Enter your password: `.diary yourpassword`");
-
-    if (q.trim() !== diaries[userId].password) return reply("❌ Incorrect password!");
-
-    let diaryText = "📖 *Your Diary Entries:*\n\n";
-    diaries[userId].entries.forEach(entry => {
-        diaryText += `📅 *${entry.date}* 🕒 *${entry.time}*\n📝 ${entry.text}\n\n`;
-    });
-
-    await conn.sendMessage(from, {
-        image: { url: DIARY_IMG },
-        caption: diaryText || "📖 Your diary is empty. Use `.setdiary your message` to add entries."
-    }, { quoted: mek });
-});
-
-// **.setdiary Command (Add a New Entry)**
-cmd({
-    pattern: "setdiary",
-    desc: "Write a new diary entry (Owner only).",
-    category: "private",
-    filename: __filename
-}, async (conn, mek, m, { reply, q, isOwner, sender }) => {
-    if (!isOwner) return reply("❌ Only the bot owner can use this command.");
-    const userId = sender;
-    if (!diaries[userId]) return reply("❌ You don't have a diary. Use `.diary yourpassword` to create one.");
-    if (!q) return reply("✍️ Provide the text to add.");
-
-    const now = new Date();
-    const date = now.toLocaleDateString('fr-FR');
-    const time = now.toLocaleTimeString('fr-FR', { hour12: false });
-
-    diaries[userId].entries.push({ date, time, text: q.trim() });
-    saveDiaries();
-
-    reply("✅ Your diary entry has been saved!");
-});
-
-// **.resetdiary Command (Delete All Entries)**
-cmd({
-    pattern: "resetdiary",
-    desc: "Reset your diary (delete all entries) (Owner only).",
-    category: "private",
-    filename: __filename
-}, async (conn, mek, m, { reply, q, isOwner, sender }) => {
-    if (!isOwner) return reply("❌ Only the bot owner can use this command.");
-    const userId = sender;
-    if (!diaries[userId]) return reply("❌ No diary to reset.");
-    if (!q || q.trim() !== diaries[userId].password) return reply("⚠️ Use `.resetdiary yourpassword` to confirm.");
-
-    delete diaries[userId];
-    saveDiaries();
-
-    reply("✅ Your diary has been reset!");
 });
