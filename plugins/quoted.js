@@ -1,3 +1,6 @@
+
+const axios = require("axios");
+const { cmd } = require("../command");
 const { cmd } = require('../lib');
 const { proto } = require('@whiskeysockets/baileys');
 
