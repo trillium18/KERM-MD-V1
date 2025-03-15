@@ -32,6 +32,7 @@ cmd({
     }
 
     const mimeType = quoted.mtype || quoted.mediaType; // Mieux gérer les types MIME
+    console.log("MIME Type détecté:", mimeType); // Débogage
     let mediaType;
 
     // Identifier le type de fichier multimédia
@@ -46,8 +47,16 @@ cmd({
     }
 
     // Télécharger et sauvegarder le fichier multimédia
+    console.log("Tentative de téléchargement du média...");
     const savedFilePath = await bot.downloadAndSaveMediaMessage(quoted);
+    console.log("Chemin du fichier sauvegardé:", savedFilePath); // Débogage
+
+    if (!savedFilePath) {
+      return reply("❌ Failed to download the media. Please check the media type or permissions.");
+    }
+
     const resolvedFilePath = path.resolve(savedFilePath);
+    console.log("Chemin résolu du fichier:", resolvedFilePath); // Débogage
 
     // Préparer l'objet de réponse
     const mediaMessage = {
@@ -59,7 +68,7 @@ cmd({
     await bot.sendMessage(chat.sender, mediaMessage, { quoted: message });
     await reply("✅ Successfully saved and sent the media file.");
   } catch (error) {
-    console.error(error);
+    console.error("Erreur lors de la sauvegarde:", error); // Débogage
     await reply("❌ Failed to save and send the media. Please try again.");
   }
 });
