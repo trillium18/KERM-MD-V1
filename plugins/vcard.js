@@ -16,6 +16,7 @@ const { cmd } = require('../command');
 cmd(
     {
         pattern: "vcard",
+        react: "📲",
         desc: "Create a contact card (vCard) from a replied message.",
         category: "general",
         filename: __filename,
