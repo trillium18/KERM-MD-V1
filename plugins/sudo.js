@@ -1,6 +1,7 @@
 const { cmd } = require('../command');
 const config = require('../config');
 const fs = require('fs');
+const path = require("path");
 
 // Load sudo users list from a JSON file
 const sudoFile = '../my_data/sudo.json';
