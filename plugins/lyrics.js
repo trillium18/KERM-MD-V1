@@ -1,13 +1,12 @@
 
 
-
-
-
 const axios = require('axios');
 const { cmd } = require('../command');
 
 cmd({
     pattern: "lyrics",
+    alias: ["lyric"],
+    react: "🔮",
     desc: "Fetches lyrics for a song via an API.",
     category: "music",
     filename: __filename,
