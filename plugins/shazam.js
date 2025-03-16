@@ -13,31 +13,39 @@ cmd({
     filename: __filename,
 }, async (conn, m, { reply }) => {
     try {
-        // Vérifie si le message est une réponse à un fichier audio
         if (!m.quoted || !m.quoted.mimetype.startsWith('audio')) {
             return reply('❌ Veuillez répondre à un message contenant un fichier audio.');
         }
 
-        // Télécharge le fichier audio
+        // Téléchargement du fichier audio
         const audioBuffer = await m.quoted.download();
         const tempFilePath = path.join(os.tmpdir(), 'audio_sample.mp3');
         fs.writeFileSync(tempFilePath, audioBuffer);
 
-        // Prépare les données pour l'API AudD
+        // Vérification de la taille du fichier
+        const stats = fs.statSync(tempFilePath);
+        if (stats.size > 10 * 1024 * 1024) {
+            fs.unlinkSync(tempFilePath);
+            return reply('❌ Le fichier est trop volumineux. (max 10 Mo)');
+        }
+
+        // Préparation des données pour l'API
         const formData = new FormData();
-        formData.append('api_token', '088e1380100df1e7832842d31aab7e88');
+        formData.append('api_token', 'VOTRE_CLÉ_API_AUDD');
         formData.append('file', fs.createReadStream(tempFilePath));
         formData.append('return', 'apple_music,spotify');
 
-        // Envoie la requête à l'API AudD
+        // Envoi de la requête à l'API
         const response = await axios.post('https://api.audd.io/', formData, {
             headers: formData.getHeaders(),
         });
 
-        // Supprime le fichier temporaire
-        fs.unlinkSync(tempFilePath);
+        fs.unlinkSync(tempFilePath); // Supprimer le fichier temporaire
 
-        // Traite la réponse de l'API
+        // Affichage de la réponse API
+        console.log('API Response:', response.data);
+
+        // Traitement du résultat
         if (response.data.status === 'success' && response.data.result) {
             const { artist, title, album, release_date, spotify, apple_music } = response.data.result;
             let message = `🎵 *Musique identifiée* 🎵\n\n`;
@@ -51,8 +59,9 @@ cmd({
         } else {
             reply('❌ Aucune correspondance trouvée pour cet extrait audio.');
         }
+
     } catch (error) {
-        console.error('Erreur lors de l\'identification de la musique :', error);
-        reply('❌ Une erreur est survenue lors de l\'identification de la musique.');
+        console.error('Erreur lors de l\'identification de la musique :', error?.response?.data || error?.message);
+        reply(`❌ Erreur : ${error?.response?.data?.error || error.message}`);
     }
 });
