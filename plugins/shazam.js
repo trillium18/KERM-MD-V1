@@ -1,40 +1,41 @@
 const { cmd } = require('../command');
-const sharp = require('sharp');  // Assurez-vous d'avoir installé la bibliothèque sharp
+const sharp = require('sharp');
 
 cmd({
     pattern: "hd",
     desc: "Améliore la qualité d’une image (4K).",
-    category: "image",
-    react: "🖼️",
+    category: "tools",
+    react: "📷",
     filename: __filename,
 }, async (conn, mek, m, { reply, quoted }) => {
-    // Vérification si une image a été envoyée
-    let media = quoted ? quoted : m;
-    if (!media || !media.message || !media.message.imageMessage) {
-        return reply("❌ Veuillez répondre à une image ou envoyer une image pour l'améliorer.");
-    }
-
-    // Télécharger l'image
-    const img = await conn.downloadAndSaveMediaMessage(media);
-    
     try {
-        // Améliorer l'image en utilisant sharp (ici on l'agrandit en 4K)
-        const outputPath = './temp/hd-image.jpg';  // Chemin de sortie pour l'image améliorée
+        // Vérifie si l'utilisateur a répondu à une image
+        if (!quoted) {
+            return reply("❌ Veuillez répondre à une image ou envoyer une image pour l'améliorer.");
+        }
 
-        await sharp(img)
-            .resize(3840, 2160)  // 4K resolution
-            .toFile(outputPath, (err, info) => {
-                if (err) {
-                    return reply(`❌ Une erreur est survenue lors de l'amélioration de l'image : ${err.message}`);
-                }
-                
-                // Envoi de l'image améliorée
-                conn.sendMessage(m.chat, {
-                    image: { url: outputPath },
-                    caption: "🔝 Voici votre image améliorée en 4K !"
-                });
-            });
+        // Récupère le mime type de l'image envoyée
+        let mime = (quoted.msg || quoted).mimetype || "";
+        if (!mime.startsWith("image")) {
+            return reply("❌ Veuillez répondre à une image valide.");
+        }
+
+        // Téléchargement de l'image
+        const media = await quoted.download();
+        if (!media) return reply("❌ Impossible de télécharger l'image.");
+
+        // Utilisation de Sharp pour améliorer la qualité de l'image (redimensionnement en 4K)
+        const enhancedImage = await sharp(media)
+            .resize(3840, 2160)  // Résolution 4K
+            .toBuffer();
+
+        // Envoi de l'image améliorée
+        await conn.sendMessage(m.chat, {
+            image: { url: 'data:image/jpeg;base64,' + enhancedImage.toString('base64') },
+            caption: "Voici l'image améliorée en 4K !"
+        });
     } catch (error) {
-        return reply(`❌ Une erreur est survenue : ${error.message}`);
+        console.error('Erreur lors de l\'amélioration de l\'image:', error);
+        reply('❌ Une erreur s\'est produite lors de l\'amélioration de l\'image.');
     }
 });
