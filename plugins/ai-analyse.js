@@ -20,6 +20,7 @@ const { cmd } = require('../command');
 
 cmd({
   pattern: "gemini",
+  react: "🧠",
   desc: "Analyzes an image using the Gemini API.",
   category: "tools",
   filename: __filename,
