@@ -27,7 +27,7 @@ const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, 
 const fs = require('fs')
 const ff = require('fluent-ffmpeg')
 const P = require('pino')
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage } = require('canvas')
 const config = require('./config')
 const rankCommand = require('./plugins/rank')
 const qrcode = require('qrcode-terminal')
