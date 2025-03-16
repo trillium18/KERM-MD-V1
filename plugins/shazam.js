@@ -1,82 +1,43 @@
 const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
 const { cmd } = require('../command');
 
+const QUOTE_IMG = "https://i.ibb.co/4Zq1jCNP/lordkerm.jpg"; // Image par défaut si nécessaire
+
 cmd({
-    pattern: 'identify',
-    desc: 'Identifie une musique à partir d\'un extrait audio.',
-    category: 'tools',
-    use: '.identify (répondre à un message audio)',
+    pattern: "quote",
+    desc: "Create an image quote from the provided text.",
+    category: "tools",
+    use: ".quote [text]",
     filename: __filename,
-}, async (conn, m, { reply }) => {
+}, async (conn, mek, m, { reply, q, from }) => {
+    if (!q) return reply("❌ Please provide a text to create a quote.");
+
     try {
-        // Vérification que le message cité existe
-        if (!m.quoted) {
-            return reply('❌ Veuillez répondre à un message contenant un fichier audio.');
-        }
+        // Make a request to an API to generate the quote image
+        const { data } = await axios.get(`https://api.quotable.io/random`);
+        
+        const quote = q;
+        const author = data.author || "Unknown";
 
-        // Vérification du type MIME dans plusieurs chemins possibles
-        const mimeType = m.quoted.mimetype || m.quoted.message?.audioMessage?.mimetype || '';
-        console.log("MIME Type:", mimeType);
-
-        // Vérification si le fichier est un fichier audio
-        if (!mimeType || !mimeType.startsWith('audio')) {
-            return reply('❌ Le fichier cité n\'est pas un fichier audio.');
-        }
-
-        // Téléchargement du fichier audio
-        const audioBuffer = await m.quoted.download();
-        if (!audioBuffer) {
-            return reply('❌ Échec du téléchargement du fichier audio.');
-        }
-
-        const tempFilePath = path.join(os.tmpdir(), 'audio_sample.mp3');
-        fs.writeFileSync(tempFilePath, audioBuffer);
-
-        // Vérification de la taille du fichier
-        const stats = fs.statSync(tempFilePath);
-        if (stats.size > 10 * 1024 * 1024) { // 10 Mo
-            fs.unlinkSync(tempFilePath);
-            return reply('❌ Le fichier est trop volumineux. (max 10 Mo)');
-        }
-
-        // Préparation des données pour l'API
-        const formData = new FormData();
-        formData.append('api_token', 'VOTRE_CLÉ_API_AUDD');
-        formData.append('file', fs.createReadStream(tempFilePath));
-        formData.append('return', 'apple_music,spotify');
-
-        // Envoi de la requête à l'API
-        const response = await axios.post('https://api.audd.io/', formData, {
-            headers: formData.getHeaders(),
-        });
-
-        fs.unlinkSync(tempFilePath); // Supprimer le fichier temporaire
-
-        // Affichage de la réponse API
-        console.log('API Response:', response.data);
-
-        // Traitement du résultat
-        if (response.data.status === 'success' && response.data.result) {
-            const { artist, title, album, release_date, spotify, apple_music } = response.data.result;
-            let message = `🎵 *Musique identifiée* 🎵\n\n`;
-            message += `*Titre* : ${title}\n`;
-            message += `*Artiste* : ${artist}\n`;
-            if (album) message += `*Album* : ${album}\n`;
-            if (release_date) message += `*Date de sortie* : ${release_date}\n`;
-            if (spotify) message += `\n*🎧 Écouter sur Spotify* : ${spotify.external_urls.spotify}\n`;
-            if (apple_music) message += `*🍎 Écouter sur Apple Music* : ${apple_music.url}\n`;
-
-            reply(message);
-        } else {
-            reply('❌ Aucune correspondance trouvée pour cet extrait audio.');
-        }
-
+        let formattedInfo = `🖼️ *Quote Created*:\n\n❝ ${quote} ❞\n\n– ${author}`;
+        
+        await conn.sendMessage(from, {
+            image: { url: QUOTE_IMG },
+            caption: formattedInfo,
+            contextInfo: { 
+                mentionedJid: [m.sender],
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '120363321386877609@newsletter',
+                    newsletterName: '𝐊𝐄𝐑𝐌 𝐃𝐈𝐀𝐑𝐘',
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: mek });
+        
     } catch (error) {
-        console.error('Erreur lors de l\'identification de la musique :', error?.response?.data || error?.message);
-        reply(`❌ Erreur : ${error?.response?.data?.error || error.message}`);
+        console.error("Error creating quote:", error);
+        reply(`❌ An error occurred while creating the quote.`);
     }
 });
