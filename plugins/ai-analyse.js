@@ -26,18 +26,20 @@ cmd({
 }, async (conn, mek, m, { reply, quoted }) => {
     try {
         if (!quoted) return reply("❌ Please reply to an image.");
-        let mime = m.quoted.mimetype || "";
+        
+        // Use the destructured 'quoted' variable
+        let mime = quoted.mimetype || "";
         if (!/image/.test(mime)) {
             return reply("❌ Please reply to an image message.");
         }
         
         // Download the image from the quoted message
-        let imgBuffer = await m.quoted.download();
+        let imgBuffer = await quoted.download();
         if (!imgBuffer) return reply("❌ Failed to download the image.");
         
         // Prepare form data with the image
         let form = new FormData();
-        form.append('image', imgBuffer, { filename: 'image.jpg' });
+        form.append('image', imgBuffer, { filename: 'image.jpg', contentType: mime });
         
         // Send the image to the API
         const response = await axios.post("https://api.nexoracle.com/ai/gemini-image", form, {
@@ -54,7 +56,7 @@ cmd({
         
         reply(`🤖 *Image Analysis:*\n\n${explanation}`);
     } catch (error) {
-        console.error(error);
+        console.error("Error in .gemini command:", error);
         reply("❌ An error occurred: " + error.message);
     }
 });
