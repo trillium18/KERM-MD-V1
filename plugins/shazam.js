@@ -4,7 +4,7 @@ const { cmd } = require('../command');
 const QUOTE_IMG = "https://i.ibb.co/4Zq1jCNP/lordkerm.jpg"; // Image par défaut si nécessaire
 
 cmd({
-    pattern: "quote",
+    pattern: "quote2",
     desc: "Create an image quote from the provided text.",
     category: "tools",
     use: ".quote [text]",
