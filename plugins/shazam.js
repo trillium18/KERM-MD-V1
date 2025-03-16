@@ -18,14 +18,21 @@ cmd({
             return reply('❌ Veuillez répondre à un message contenant un fichier audio.');
         }
 
-        // Vérification que le message cité contient un fichier audio
-        const mimeType = m.quoted.mimetype || '';
-        if (!mimeType.startsWith('audio')) {
+        // Vérification du type MIME dans plusieurs chemins possibles
+        const mimeType = m.quoted.mimetype || m.quoted.message?.audioMessage?.mimetype || '';
+        console.log("MIME Type:", mimeType);
+
+        // Vérification si le fichier est un fichier audio
+        if (!mimeType || !mimeType.startsWith('audio')) {
             return reply('❌ Le fichier cité n\'est pas un fichier audio.');
         }
 
         // Téléchargement du fichier audio
         const audioBuffer = await m.quoted.download();
+        if (!audioBuffer) {
+            return reply('❌ Échec du téléchargement du fichier audio.');
+        }
+
         const tempFilePath = path.join(os.tmpdir(), 'audio_sample.mp3');
         fs.writeFileSync(tempFilePath, audioBuffer);
 
@@ -62,6 +69,7 @@ cmd({
             if (release_date) message += `*Date de sortie* : ${release_date}\n`;
             if (spotify) message += `\n*🎧 Écouter sur Spotify* : ${spotify.external_urls.spotify}\n`;
             if (apple_music) message += `*🍎 Écouter sur Apple Music* : ${apple_music.url}\n`;
+
             reply(message);
         } else {
             reply('❌ Aucune correspondance trouvée pour cet extrait audio.');
