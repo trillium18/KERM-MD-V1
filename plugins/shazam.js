@@ -13,8 +13,15 @@ cmd({
     filename: __filename,
 }, async (conn, m, { reply }) => {
     try {
-        if (!m.quoted || !m.quoted.mimetype.startsWith('audio')) {
+        // Vérification que le message cité existe
+        if (!m.quoted) {
             return reply('❌ Veuillez répondre à un message contenant un fichier audio.');
+        }
+
+        // Vérification que le message cité contient un fichier audio
+        const mimeType = m.quoted.mimetype || '';
+        if (!mimeType.startsWith('audio')) {
+            return reply('❌ Le fichier cité n\'est pas un fichier audio.');
         }
 
         // Téléchargement du fichier audio
@@ -24,7 +31,7 @@ cmd({
 
         // Vérification de la taille du fichier
         const stats = fs.statSync(tempFilePath);
-        if (stats.size > 10 * 1024 * 1024) {
+        if (stats.size > 10 * 1024 * 1024) { // 10 Mo
             fs.unlinkSync(tempFilePath);
             return reply('❌ Le fichier est trop volumineux. (max 10 Mo)');
         }
@@ -53,8 +60,8 @@ cmd({
             message += `*Artiste* : ${artist}\n`;
             if (album) message += `*Album* : ${album}\n`;
             if (release_date) message += `*Date de sortie* : ${release_date}\n`;
-            if (spotify) message += `\n*Écouter sur Spotify* : ${spotify.external_urls.spotify}\n`;
-            if (apple_music) message += `*Écouter sur Apple Music* : ${apple_music.url}\n`;
+            if (spotify) message += `\n*🎧 Écouter sur Spotify* : ${spotify.external_urls.spotify}\n`;
+            if (apple_music) message += `*🍎 Écouter sur Apple Music* : ${apple_music.url}\n`;
             reply(message);
         } else {
             reply('❌ Aucune correspondance trouvée pour cet extrait audio.');
