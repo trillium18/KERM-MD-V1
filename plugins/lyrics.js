@@ -1,4 +1,4 @@
-/*
+
 
 
 
@@ -34,4 +34,3 @@ cmd({
         reply("❌ An error occurred: " + error.message);
     }
 });
-*/
