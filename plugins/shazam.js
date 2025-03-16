@@ -1,10 +1,9 @@
-const axios = require('axios');
+const { createCanvas, loadImage } = require('canvas');
 const { cmd } = require('../command');
-
-const QUOTE_IMG = "https://i.ibb.co/4Zq1jCNP/lordkerm.jpg"; // Image par défaut si nécessaire
+const fs = require('fs');
 
 cmd({
-    pattern: "quoted",
+    pattern: "quote",
     desc: "Create an image quote from the provided text.",
     category: "tools",
     use: ".quote [text]",
@@ -12,32 +11,43 @@ cmd({
 }, async (conn, mek, m, { reply, q, from }) => {
     if (!q) return reply("❌ Please provide a text to create a quote.");
 
-    try {
-        // Make a request to an API to generate the quote image
-        const { data } = await axios.get(`https://api.quotable.io/random`);
-        
-        const quote = q;
-        const author = data.author || "Unknown";
+    const quoteText = q;
+    const author = "Unknown"; // You can customize the author if needed.
 
-        let formattedInfo = `🖼️ *Quote Created*:\n\n❝ ${quote} ❞\n\n– ${author}`;
-        
-        await conn.sendMessage(from, {
-            image: { url: QUOTE_IMG },
-            caption: formattedInfo,
-            contextInfo: { 
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363321386877609@newsletter',
-                    newsletterName: '𝐊𝐄𝐑𝐌 𝐃𝐈𝐀𝐑𝐘',
-                    serverMessageId: 143
-                }
-            }
-        }, { quoted: mek });
-        
-    } catch (error) {
-        console.error("Error creating quote:", error);
-        reply(`❌ An error occurred while creating the quote.`);
-    }
+    // Create canvas for the quote image
+    const canvas = createCanvas(800, 400);
+    const ctx = canvas.getContext('2d');
+
+    // Set background color
+    ctx.fillStyle = '#f3f3f3'; // Background color (light gray)
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Set font and text style
+    ctx.font = 'bold 30px Arial';
+    ctx.fillStyle = '#333'; // Text color
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Draw the quote text on the canvas
+    const quoteX = canvas.width / 2;
+    const quoteY = canvas.height / 2 - 40;
+    const authorY = canvas.height / 2 + 40;
+
+    ctx.fillText(`❝ ${quoteText} ❞`, quoteX, quoteY);
+    ctx.font = 'italic 20px Arial';
+    ctx.fillText(`- ${author}`, quoteX, authorY);
+
+    // Save the canvas as an image
+    const outputPath = './quote_image.png';
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(outputPath, buffer);
+
+    // Send the generated image
+    await conn.sendMessage(from, {
+        image: { url: outputPath },
+        caption: `🖼️ *Quote Created*:\n\n❝ ${quoteText} ❞\n\n– ${author}`,
+    }, { quoted: mek });
+
+    // Clean up the image after sending
+    fs.unlinkSync(outputPath);
 });
