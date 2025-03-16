@@ -19,44 +19,52 @@ const path = require('path');
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "gemini",
-    desc: "Analyzes an image and explains what it is.",
-    category: "ai",
-    filename: __filename,
+  pattern: "gemini",
+  desc: "Analyzes an image using the Gemini API.",
+  category: "tools",
+  filename: __filename,
 }, async (conn, mek, m, { reply, quoted }) => {
-    try {
-        if (!quoted) return reply("❌ Please reply to an image.");
-        
-        // Use the destructured 'quoted' variable
-        let mime = quoted.mimetype || "";
-        if (!/image/.test(mime)) {
-            return reply("❌ Please reply to an image message.");
-        }
-        
-        // Download the image from the quoted message
-        let imgBuffer = await quoted.download();
-        if (!imgBuffer) return reply("❌ Failed to download the image.");
-        
-        // Prepare form data with the image
-        let form = new FormData();
-        form.append('image', imgBuffer, { filename: 'image.jpg', contentType: mime });
-        
-        // Send the image to the API
-        const response = await axios.post("https://api.nexoracle.com/ai/gemini-image", form, {
-            headers: {
-                ...form.getHeaders()
-            }
-        });
-        
-        // Extract explanation from API response
-        const explanation = response.data.explanation || response.data.result || response.data.text;
-        if (!explanation) {
-            return reply("❌ Could not retrieve an explanation from the API.");
-        }
-        
-        reply(`🤖 *Image Analysis:*\n\n${explanation}`);
-    } catch (error) {
-        console.error("Error in .gemini command:", error);
-        reply("❌ An error occurred: " + error.message);
+  try {
+    if (!quoted) return reply("❌ Please reply to an image.");
+    let mime = (quoted.msg || quoted).mimetype || "";
+    if (!mime.startsWith("image"))
+      return reply("❌ Please reply to an image message.");
+
+    const imgBuffer = await quoted.download();
+    if (!imgBuffer) return reply("❌ Failed to download the image.");
+
+    const tempPath = path.join(os.tmpdir(), 'kerm_gemini.jpg');
+    fs.writeFileSync(tempPath, imgBuffer);
+
+    const form = new FormData();
+    form.append("image", fs.createReadStream(tempPath));
+    const imgbbResponse = await axios.post("https://api.imgbb.com/1/upload", form, {
+      params: { key: "4a9c3527b0cd8b12dd4d8ab166a0f592" },
+      headers: { ...form.getHeaders() }
+    });
+    if (!imgbbResponse.data || !imgbbResponse.data.data || !imgbbResponse.data.data.url) {
+      fs.unlinkSync(tempPath);
+      return reply("❌ Error uploading the image.");
     }
+    const uploadedUrl = imgbbResponse.data.data.url;
+    fs.unlinkSync(tempPath);
+
+    await reply("```Kerm-md is analyzing the image...```");
+
+    const geminiUrl = "https://api.nexoracle.com/ai/gemini-image";
+    const paramsObj = {
+      apikey: "free_key@maher_apis",
+      prompt: "gemini",
+      url: uploadedUrl
+    };
+    const geminiResponse = await axios.get(geminiUrl, { params: paramsObj });
+    if (!geminiResponse.data || geminiResponse.data.status !== 200) {
+      return reply("❌ Unable to analyze the image. Please try again later.");
+    }
+    const analysis = geminiResponse.data.result || "No analysis result available.";
+    reply("🤖 *Image Analysis Result:*\n\n" + analysis + "\n\n> Powered by Kerm md");
+  } catch (error) {
+    console.error("Error analyzing image:", error);
+    reply("❌ Unable to analyze the image. Please try again later.");
+  }
 });
