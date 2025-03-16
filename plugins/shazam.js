@@ -3,7 +3,7 @@ const { cmd } = require('../command');
 const fs = require('fs');
 
 cmd({
-    pattern: "quote",
+    pattern: "quoted",
     desc: "Create an image quote from the provided text.",
     category: "tools",
     use: ".quote [text]",
