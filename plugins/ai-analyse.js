@@ -63,7 +63,25 @@ cmd({
       return reply("❌ Unable to analyze the image. Please try again later.");
     }
     const analysis = geminiResponse.data.result || "No analysis result available.";
-    reply("🤖 *Image Analysis Result:*\n\n" + analysis + "\n\n> Powered by Kerm md");
+    
+    const formattedInfo = `🤖 *Image Analysis Result:*\n\n${analysis}\n\n> Powered by Kerm md`;
+    const GEMINI_IMG = "https://files.catbox.moe/zc8qtj.jpeg";
+
+    await conn.sendMessage(m.chat, {
+      image: { url: GEMINI_IMG },
+      caption: formattedInfo,
+      contextInfo: { 
+        mentionedJid: [m.sender],
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363321386877609@newsletter',
+          newsletterName: '𝐊𝐄𝐑𝐌 𝐆𝐄𝐌𝐈𝐍𝐈',
+          serverMessageId: 143
+        }
+      }
+    }, { quoted: mek });
+
   } catch (error) {
     console.error("Error analyzing image:", error);
     reply("❌ Unable to analyze the image. Please try again later.");
