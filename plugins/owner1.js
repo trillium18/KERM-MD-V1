@@ -73,19 +73,25 @@ cmd({
     filename: __filename,
 }, async (conn, mek, m, { isOwner, isGroup, quoted, reply }) => {
     if (!isOwner) return reply("❌ You are not the owner!");
-
-    let user = "";
+    
+    let target = "";
     if (isGroup) {
-        if (!quoted) return reply("❌ In a group, please reply to the message of the participant you want to block.");
-        user = quoted.sender;
+        if (quoted) {
+            target = quoted.sender;
+        } else if (m.mentionedJid && m.mentionedJid.length > 0) {
+            target = m.mentionedJid[0];
+        } else {
+            return reply("❌ In a group, please reply to or mention the user you want to block.");
+        }
     } else {
-        user = m.chat;
+        target = m.chat;
     }
-
+    
     try {
-        await conn.updateBlockStatus(user, 'block');
-        reply(`🚫 User @${user.split('@')[0]} blocked successfully.`, null, { mentions: [user] });
+        await conn.updateBlockStatus(target, 'block');
+        reply(`🚫 User @${target.split('@')[0]} blocked successfully.`, null, { mentions: [target] });
     } catch (error) {
+        console.error("Error blocking user:", error);
         reply(`❌ Error blocking user: ${error.message}`);
     }
 });
