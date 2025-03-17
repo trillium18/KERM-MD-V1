@@ -41,8 +41,9 @@ const { tmpdir } = require('os')
 const Crypto = require('crypto')
 const path = require('path')
 const prefix = config.PREFIX
+const ownerNumber = [config.OWNER_NUMBER];
 
-const ownerNumber = ['237656520674']
+
 
 //===================SESSION-AUTH============================
 if (!fs.existsSync(__dirname + '/auth_info_baileys/creds.json')) {
