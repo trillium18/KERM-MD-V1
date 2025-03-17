@@ -65,7 +65,7 @@ const { cmd } = require('../command');
 const config = require('../config');
 
 cmd({
-  pattern: "dev",
+  pattern: "owner",
   react: "👑", 
   alias: ["kerm"],
   desc: "Get owner number",
@@ -110,48 +110,4 @@ cmd({
       text: 'Désolé, il y a eu une erreur lors de la récupération des contacts des propriétaires.'
     }, { quoted: mek });
   }
-});
-
-// Assure-toi d'importer la config depuis le bon chemin
-const config = require('./config');
-
-cmd({
-    pattern: "owner",
-    desc: "Sends the owner's VCard.",
-    category: "owner",
-    filename: __filename,
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        // Récupération directe des informations du propriétaire depuis config.js
-        const number = config.OWNER_NUMBER;
-        const name = config.OWNER_NAME;
-        const info = global.botname || "LORD-KERM";
-
-        const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${name}
-ORG:${info};
-TEL;type=CELL;type=VOICE;waid=${number.replace("+", "")}:${number}
-END:VCARD`;
-
-        await conn.sendMessage(from, { 
-            contacts: { 
-                displayName: name, 
-                contacts: [{ vcard }] 
-            },
-            contextInfo: {
-                externalAdReply: {
-                    title: global.botname || "LORD-KERM",
-                    body: "𝙲𝚘𝚗𝚝𝚊𝚌𝚝 𝚝𝚑𝚎 𝚘𝚠𝚗𝚎𝚛",
-                    renderLargerThumbnail: true,
-                    thumbnailUrl: "https://files.catbox.moe/z7c67w.jpg",
-                    mediaType: 2,
-                    sourceUrl: `https://wa.me/${number.replace("+", "")}?text=Hello, I am ${pushname}`
-                }
-            }
-        }, { quoted: mek });
-    } catch (error) {
-        console.error("Error in owner command:", error);
-        reply("❌ An error occurred while sending the VCard.");
-    }
 });
