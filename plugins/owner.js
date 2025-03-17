@@ -64,7 +64,7 @@ async (conn, mek, m, { from }) => {
 const { cmd } = require('../command');
 
 cmd({
-  pattern: "owner",
+  pattern: "dev",
   react: "👑", 
   alias: ["kerm"],
   desc: "Get owner number",
