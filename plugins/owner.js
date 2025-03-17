@@ -62,6 +62,8 @@ async (conn, mek, m, { from }) => {
 
 
 const { cmd } = require('../command');
+const ownerNumber = [config.OWNER_NUMBER];
+const ownerNumber = [config.OWNER_NAME];
 
 cmd({
   pattern: "dev",
