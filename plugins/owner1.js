@@ -70,50 +70,66 @@ cmd({
     }
 });
 cmd({
-    pattern: "setname",
-    desc: "Set User name",
-    category: "owner",
+    pattern: "setmyname",
+    desc: "Set your WhatsApp display name.",
+    category: "privacy",
+    react: "⚙️",
     filename: __filename
 },
-async (conn, mek, m, { isOwner, q, reply }) => {
+async (conn, mek, m, { from, isOwner, reply, args }) => {
     if (!isOwner) return reply("❌ You are not the owner!");
-    if (!q) return reply("❌ Enter a name!");
-    
+
+    // Ensure you have the display name argument
+    const displayName = args.join(" ");
+    if (!displayName) return reply("❌ Please provide a display name.");
+
     try {
-        await conn.updateProfileName(q);
-        reply(`✅ Username updated to: ${q}`);
-    } catch (error) {
-        console.error("Error updating username:", error);
-        reply(`❌ Error updating username: ${error.message}`);
+        // Ensure the session is loaded before trying to update
+        const { state, saveCreds } = await useMultiFileAuthState('path/to/auth/folder');
+        const conn = makeWASocket({
+            auth: state,
+            printQRInTerminal: true,
+        });
+
+        conn.ev.on('creds.update', saveCreds);
+
+        // Update display name after connection
+        await conn.updateProfileName(displayName);
+        reply(`✅ Your display name has been set to: ${displayName}`);
+    } catch (err) {
+        console.error(err);
+        reply("❌ Failed to set your display name.");
     }
 });
 cmd({
-    pattern: "getpp",
-    desc: "Fetch the profile picture of a tagged or replied user.",
-    category: "owner",
+    pattern: "setpp",
+    desc: "Set bot profile picture.",
+    category: "privacy",
+    react: "🖼️",
     filename: __filename
-}, async (conn, mek, m, { quoted, isGroup, sender, participants, reply }) => {
+},
+async (conn, mek, m, { from, isOwner, quoted, reply }) => {
+    if (!isOwner) return reply("❌ You are not the owner!");
+    if (!quoted || !quoted.message.imageMessage) return reply("❌ Please reply to an image.");
     try {
-        // Determine the target user
-        const targetJid = quoted ? quoted.sender : sender;
+        const stream = await downloadContentFromMessage(quoted.message.imageMessage, 'image');
+        let buffer = Buffer.from([]);
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
 
-        if (!targetJid) return reply("⚠️ Please reply to a message to fetch the profile picture.");
+        const mediaPath = path.join(__dirname, `${Date.now()}.jpg`);
+        fs.writeFileSync(mediaPath, buffer);
 
-        // Fetch the user's profile picture URL
-        const userPicUrl = await conn.profilePictureUrl(targetJid, "image").catch(() => null);
-
-        if (!userPicUrl) return reply("⚠️ No profile picture found for the specified user.");
-
-        // Send the user's profile picture
-        await conn.sendMessage(m.chat, {
-            image: { url: userPicUrl },
-            caption: "🖼️ Here is the profile picture of the specified user."
-        });
-    } catch (e) {
-        console.error("Error fetching user profile picture:", e);
-        reply("❌ An error occurred while fetching the profile picture. Please try again later.");
+        // Update profile picture with the saved file
+        await conn.updateProfilePicture(conn.user.jid, { url: `file://${mediaPath}` });
+        reply("🖼️ Profile picture updated successfully!");
+    } catch (error) {
+        console.error("Error updating profile picture:", error);
+        reply(`❌ Error updating profile picture: ${error.message}`);
     }
 });
+
 // 4. Block User
 cmd({
     pattern: "block",
@@ -211,20 +227,36 @@ async (conn, mek, m, { from, isOwner, reply }) => {
     const groupJids = Object.keys(groups).join('\n');
     reply(`📝 *Group JIDs:*\n\n${groupJids}`);
 });
-cmd({
-    pattern: "edit",
-    react: "💬",
-    desc: "Edit sent messages.",
-    category: "owner",
-    filename: __filename
-}, async (conn, mek, m, { quoted, q, reply }) => {
-    if (!quoted) return reply("⚠️ Reply to a message with `.edit <new text>` to edit it.");
-    if (!q) return reply("⚠️ Provide the new text to edit the message.\nExample: `.edit New text`");
 
+cmd({
+    pattern: "getprivacy",
+    desc: "Get the bot Number Privacy Setting Updates.",
+    category: "privacy",
+    use: '.getprivacy',
+    filename: __filename
+},
+async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
-        await conn.sendMessage(m.chat, { text: q, edit: quoted.key });
+        if (!isOwner) return reply('🚫 *You must be an Owner to use this command*');
+        const duka = await conn.fetchPrivacySettings?.(true);
+        if (!duka) return reply('🚫 *Failed to fetch privacy settings*');
+        
+        let puka = `
+╭───「 𝙴𝙼𝙿𝙸𝚁𝙴-𝙼𝙳 𝙿𝚁𝙸𝚅𝙰𝙲𝚈  」───◆  
+│ ∘ 𝚁𝚎𝚊𝚍 𝚁𝚎𝚌𝚎𝚒𝚙𝚝: ${duka.readreceipts}  
+│ ∘ 𝙿𝚛𝚘𝚏𝚒𝚕𝚎 𝙿𝚒𝚌𝚝𝚞𝚛𝚎: ${duka.profile}  
+│ ∘ 𝚂𝚝𝚊𝚝𝚞𝚜: ${duka.status}  
+│ ∘ 𝙾𝚗𝚕𝚒𝚗𝚎: ${duka.online}  
+│ ∘ 𝙻𝚊𝚜𝚝 𝚂𝚎𝚎𝚗: ${duka.last}  
+│ ∘ 𝙶𝚛𝚘𝚞𝚙 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.groupadd}  
+│ ∘ 𝙲𝚊𝚕𝚕 𝙿𝚛𝚒𝚟𝚊𝚌𝚢: ${duka.calladd}  
+╰────────────────────
+
+      [ 𝙴𝙼𝙿𝙸𝚁𝙴-𝙼𝙳 ]  
+𝙿𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝙴𝚖𝚙𝚒𝚛𝚎 𝚃𝚎𝚌𝚑  `;
+        await conn.sendMessage(from, { text: puka }, { quoted: mek });
     } catch (e) {
-        console.error(e);
-        reply(`❌ Error: ${e.message}`);
+        reply('🚫 *An error occurred!*\n\n' + e);
+        l(e);
     }
 });
