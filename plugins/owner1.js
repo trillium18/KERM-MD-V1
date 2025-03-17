@@ -14,7 +14,7 @@ Github: Kgtech-cmr
 const { cmd ,commands } = require('../command');
 const { exec } = require('child_process');
 const config = require('../config');
-const {sleep} = require('../lib/functions')
+const {sleep} = require('../lib/functions');
 const { proto, downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const { sms,downloadMediaMessage } = require('../lib/msg');
 const fs = require('fs');
