@@ -12,32 +12,45 @@ const config = require('../config')
 const {cmd , commands} = require('../command')
 const os = require("os")
 const {runtime} = require('../lib/functions')
+
 cmd({
     pattern: "system",
-    react: "♠️",
-    alias: ["uptime" ,"runtime"],
-    desc: "cheack uptime",
+    react: "⚙️",
+    alias: ["uptime", "runtime"],
+    desc: "Check system uptime and status.",
     category: "main",
     filename: __filename
 },
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try{
-let status = `*╭──────────●●►*
-*KERM-MD-V1 UPTIME LIST↷*
+async (conn, mek, m, { from, quoted, reply }) => {
+    try {
+        // ✅ Données système
+        const uptime = runtime(process.uptime());
+        const usedRam = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+        const totalRam = Math.round(os.totalmem() / 1024 / 1024);
+        const hostname = os.hostname();
 
-*_UPTIME:➠_*  ${runtime(process.uptime())}
+        // ✅ Design avec une mise en page améliorée
+        const status = `
+┌─── ⦿ *SYSTEM STATUS* ⦿ ───┐
+│ 🚀 *Uptime:*       ➔ ${uptime}
+│ 💾 *RAM Usage:*    ➔ ${usedRam}MB / ${totalRam}MB
+│ 🌐 *Hostname:*     ➔ ${hostname}
+│ 👑 *Owner:*        ➔ *KG TECH*
+└─────────────────────────────┘
+        `.trim();
 
-*_RAM USAGE:➠_* ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${Math.round(require('os').totalmem / 1024 / 1024)}MB
+        // ✅ Envoi du message formaté avec une image personnalisée
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: config.ALIVE_IMG },
+                caption: `🎯 *System Info* 🎯\n\n${status}`
+            },
+            { quoted: mek }
+        );
 
-*_HOSTNAME:➠_* ${os.hostname()}
-
-*_OWNER:➠_* *KG TECH*
-*╰──────────●●►*
-`
-await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:`${status}`},{quoted:mek})
-
-}catch(e){
-console.log(e)
-reply(`${e}`)
-}
-})
+    } catch (e) {
+        console.error(e);
+        reply(`❌ *An error occurred:* ${e.message}`);
+    }
+});
