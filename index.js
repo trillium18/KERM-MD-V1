@@ -122,7 +122,7 @@ conn.ev.on('messages.upsert', async(mek) => {
     if (mek.key && mek.key.remoteJid === "status@broadcast") {
     try {
         // Auto view status
-        if (config.AUTO_VIEW_STATUS === "true" && mek.key) {
+        if (config.AUTO_READ_STATUS === "true" && mek.key) {
             await conn.readMessages([mek.key]);
         }
 
