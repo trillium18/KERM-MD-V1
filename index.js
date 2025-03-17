@@ -41,11 +41,8 @@ const { tmpdir } = require('os')
 const Crypto = require('crypto')
 const path = require('path')
 const prefix = config.PREFIX
-const ownerNumber = [config.OWNER_NUMBER];
 
-
-////////const ownerNumber = ['237656520674']///////
-
+const ownerNumber = ['237656520674']
 
 //===================SESSION-AUTH============================
 if (!fs.existsSync(__dirname + '/auth_info_baileys/creds.json')) {
@@ -119,43 +116,16 @@ conn.sendMessage(conn.user.id, { image: { url: `https://i.ibb.co/pvkWfBPw/mrfran
 }
 })
 conn.ev.on('creds.update', saveCreds)  
+        
+//=============readstatus=======
 
 conn.ev.on('messages.upsert', async(mek) => {
-    mek = mek.messages[0]
-    if (mek.key && mek.key.remoteJid === "status@broadcast") {
-    try {
-        // Auto view status
-        if (config.AUTO_READ_STATUS === "true" && mek.key) {
-            await conn.readMessages([mek.key]);
-        }
-
-        // Auto like status
-        if (config.AUTO_LIKE_STATUS === "true") {
-            const customEmoji = config.AUTO_LIKE_EMOJI || '💜';
-            if (mek.key.remoteJid && mek.key.participant) {
-                await conn.sendMessage(
-                    mek.key.remoteJid,
-                    { react: { key: mek.key, text: customEmoji } },
-                    { statusJidList: [mek.key.participant] }
-                );
-            }
-        }
-    } catch (error) {
-        console.error("Error processing status actions:", error);
-    }
+mek = mek.messages[0]
+if (!mek.message) return	
+mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
+if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_READ_STATUS === "true"){
+await conn.readMessages([mek.key])
 }
-
-conn.ev.on('call', async (call) => {
-    const callData = call[0]; // Get the first call object
-    if (callData.status === 'offer' && config.ANTICALL === "true") {
-        await conn.sendMessage(callData.from, {
-            text: config.ANTICALL_MSG,
-            mentions: [callData.from],
-        });
-        await conn.rejectCall(callData.id, callData.from);
-    }
-});
-        
 const m = sms(conn, mek)
 const type = getContentType(mek.message)
 const content = JSON.stringify(mek.message)
@@ -184,7 +154,7 @@ const isReact = m.message.reactionMessage ? true : false
 const reply = (teks) => {
 conn.sendMessage(from, { text: teks }, { quoted: mek })
 }
-
+        
 conn.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
               let mime = '';
               let res = await axios.head(url)
