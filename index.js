@@ -318,7 +318,7 @@ if (isCmd) {
 }
 
 // Loop through all commands and execute them based on event type
-events.commands.map(async (command) => {
+events.commands.forEach(async (command) => {
     if (body && command.on === "body") {
         command.function(conn, mek, m, {
             from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber,
@@ -346,7 +346,7 @@ events.commands.map(async (command) => {
     }
 });
 
-// Ensure the app runs correctly
+// Express server for monitoring
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -357,6 +357,7 @@ app.get("/", (req, res) => {
 
 app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
 
+// Ensuring the bot reconnects properly
 setTimeout(() => {
     connectToWA();
 }, 4000);
