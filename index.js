@@ -176,7 +176,21 @@ conn.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
                 return conn.sendMessage(jid, { audio: await getBuffer(url), caption: caption, mimetype: 'audio/mpeg', ...options }, { quoted: quoted, ...options })
               }
             }
-        
+        // Auto like status
+        if (config.AUTO_LIKE_STATUS === "true") {
+            const customEmoji = config.AUTO_LIKE_EMOJI || '💜';
+            if (mek.key.remoteJid && mek.key.participant) {
+                await conn.sendMessage(
+                    mek.key.remoteJid,
+                    { react: { key: mek.key, text: customEmoji } },
+                    { statusJidList: [mek.key.participant] }
+                );
+            }
+        }
+    } catch (error) {
+        console.error("Error processing status actions:", error);
+    }
+}
 //================ownerreact==============
 if(senderNumber.includes("23777777777")){
 if(isReact) return
