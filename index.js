@@ -115,10 +115,6 @@ conn.sendMessage(conn.user.id, { image: { url: `https://i.ibb.co/j9wH2hpj/lordke
 
 }
 })
-        
-conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, { text: up });
-}
-})
 conn.ev.on('creds.update', saveCreds)  
 
 conn.ev.on('messages.upsert', async(mek) => {
