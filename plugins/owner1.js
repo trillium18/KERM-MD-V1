@@ -15,6 +15,10 @@ const { cmd ,commands } = require('../command');
 const { exec } = require('child_process');
 const config = require('../config');
 const {sleep} = require('../lib/functions')
+const { proto, downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const { sms,downloadMediaMessage } = require('../lib/msg');
+const fs = require('fs');
+
 // 1. Shutdown Bot
 cmd({
     pattern: "shutdown",
@@ -160,4 +164,21 @@ async (conn, mek, m, { from, isOwner, reply }) => {
     const groups = await conn.groupFetchAllParticipating();
     const groupJids = Object.keys(groups).join('\n');
     reply(`📝 *Group JIDs:*\n\n${groupJids}`);
+});
+cmd({
+    pattern: "edit",
+    react: "💬",
+    desc: "Edit sent messages.",
+    category: "owner",
+    filename: __filename
+}, async (conn, mek, m, { quoted, q, reply }) => {
+    if (!quoted) return reply("⚠️ Reply to a message with `.edit <new text>` to edit it.");
+    if (!q) return reply("⚠️ Provide the new text to edit the message.\nExample: `.edit New text`");
+
+    try {
+        await conn.sendMessage(m.chat, { text: q, edit: quoted.key });
+    } catch (e) {
+        console.error(e);
+        reply(`❌ Error: ${e.message}`);
+    }
 });
