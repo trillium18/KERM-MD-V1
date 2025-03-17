@@ -19,7 +19,7 @@ const fs = require('fs');
 const exec = require('child_process');
 const path = require('path');
 const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions');
-const ownerNumber = [index.ownerNumber];
+
 
 cmd({
     pattern: "vv2",
