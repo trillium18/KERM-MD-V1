@@ -116,8 +116,9 @@ conn.sendMessage(conn.user.id, { image: { url: `https://i.ibb.co/j9wH2hpj/lordke
 }
 })
         
-//=============readstatus=======
-
+conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, { text: up });
+}
+})
 conn.ev.on('creds.update', saveCreds)  
 
 conn.ev.on('messages.upsert', async(mek) => {
@@ -155,7 +156,7 @@ conn.ev.on('call', async (call) => {
         await conn.rejectCall(callData.id, callData.from);
     }
 });
-/////////
+
 mek = mek.messages[0]
 if (!mek.message) return	
 mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
