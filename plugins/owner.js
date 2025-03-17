@@ -62,6 +62,7 @@ async (conn, mek, m, { from }) => {
 
 
 const { cmd } = require('../command');
+const config = require('../config');
 
 cmd({
   pattern: "dev",
