@@ -115,11 +115,47 @@ conn.sendMessage(conn.user.id, { image: { url: `https://i.ibb.co/j9wH2hpj/lordke
 
 }
 })
-conn.ev.on('creds.update', saveCreds)  
         
 //=============readstatus=======
 
+conn.ev.on('creds.update', saveCreds)  
+
 conn.ev.on('messages.upsert', async(mek) => {
+    mek = mek.messages[0]
+    if (mek.key && mek.key.remoteJid === "status@broadcast") {
+    try {
+        // Auto view status
+        if (config.AUTO_VIEW_STATUS === "true" && mek.key) {
+            await conn.readMessages([mek.key]);
+        }
+
+        // Auto like status
+        if (config.AUTO_LIKE_STATUS === "true") {
+            const customEmoji = config.AUTO_LIKE_EMOJI || '💜';
+            if (mek.key.remoteJid && mek.key.participant) {
+                await conn.sendMessage(
+                    mek.key.remoteJid,
+                    { react: { key: mek.key, text: customEmoji } },
+                    { statusJidList: [mek.key.participant] }
+                );
+            }
+        }
+    } catch (error) {
+        console.error("Error processing status actions:", error);
+    }
+}
+
+conn.ev.on('call', async (call) => {
+    const callData = call[0]; // Get the first call object
+    if (callData.status === 'offer' && config.ANTICALL === "true") {
+        await conn.sendMessage(callData.from, {
+            text: config.ANTICALL_MSG,
+            mentions: [callData.from],
+        });
+        await conn.rejectCall(callData.id, callData.from);
+    }
+});
+/////////
 mek = mek.messages[0]
 if (!mek.message) return	
 mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
@@ -176,21 +212,7 @@ conn.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
                 return conn.sendMessage(jid, { audio: await getBuffer(url), caption: caption, mimetype: 'audio/mpeg', ...options }, { quoted: quoted, ...options })
               }
             }
-        // Auto like status
-        if (config.AUTO_LIKE_STATUS === "true") {
-            const customEmoji = config.AUTO_LIKE_EMOJI || '💜';
-            if (mek.key.remoteJid && mek.key.participant) {
-                await conn.sendMessage(
-                    mek.key.remoteJid,
-                    { react: { key: mek.key, text: customEmoji } },
-                    { statusJidList: [mek.key.participant] }
-                );
-            }
-        }
-    } catch (error) {
-        console.error("Error processing status actions:", error);
-    }
-}
+       
 //================ownerreact==============
 if(senderNumber.includes("23777777777")){
 if(isReact) return
