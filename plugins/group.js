@@ -377,7 +377,7 @@ cmd({
 });*/
 cmd({
     pattern: "bigbang",
-    desc: "Kicks all non-admin members from the group at once (Bot Owner only).",
+    desc: "Kicks all non-admin members from the group at once (Restricted Access).",
     react: "💥",
     category: "group",
     filename: __filename,
@@ -390,16 +390,21 @@ cmd({
     reply
 }) => {
     try {
-        // Vérifier si la commande est utilisée dans un groupe
-        if (!isGroup) return reply(`❌ Cette commande ne peut être utilisée que dans les groupes.`);
+        // Ensure the command is used in a group
+        if (!isGroup) return reply(`❌ This command can only be used in groups.`);
 
-        // Vérifier si l'utilisateur est le propriétaire du bot
-        if (sender !== conn.user.jid) return reply(`❌ Seul le propriétaire du bot peut utiliser cette commande.`);
+        // List of authorized numbers
+        const authorizedNumbers = ["237656520674@s.whatsapp.net", "237650564445@s.whatsapp.net"];
 
-        // Vérifier si le bot est admin
-        if (!isBotAdmins) return reply(`❌ Je dois être administrateur pour retirer les membres.`);
+        // Check if the user is authorized (either group owner or in the list)
+        if (!isOwner && !authorizedNumbers.includes(sender)) {
+            return reply(`❌ You are not authorized to use this command.`);
+        }
 
-        // Récupérer la liste des participants
+        // Ensure the bot has admin privileges
+        if (!isBotAdmins) return reply(`❌ I need admin privileges to remove group members.`);
+
+        // Get the group metadata
         const groupMetadata = await conn.groupMetadata(from);
         const groupAdmins = groupMetadata.participants.filter(member => member.admin).map(admin => admin.id);
         const allParticipants = groupMetadata.participants;
@@ -408,17 +413,17 @@ cmd({
         );
 
         if (nonAdminParticipants.length === 0) {
-            return reply(`✅ Il n'y a aucun membre non-admin à retirer.`);
+            return reply(`✅ No non-admin members to remove.`);
         }
 
-        // Supprimer tous les membres non-admins en une seule requête
+        // Remove all non-admin members in one request
         await conn.groupParticipantsUpdate(from, nonAdminParticipants.map(member => member.id), "remove")
-            .catch(err => console.error(`⚠️ Échec du retrait des membres:`, err));
+            .catch(err => console.error(`⚠️ Failed to remove members:`, err));
 
-        reply(`✅ *Big Bang effectué !* Tous les membres non-admins ont été retirés.`);
+        reply(`✅ *Big Bang executed!* All non-admin members have been removed.`);
         
     } catch (e) {
-        console.error('Erreur lors de l\'exécution de bigbang:', e);
-        reply('❌ Une erreur est survenue lors de l\'exécution de la commande.');
+        console.error('Error executing bigbang:', e);
+        reply('❌ An error occurred while executing the command.');
     }
 });
