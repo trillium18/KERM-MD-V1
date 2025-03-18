@@ -327,7 +327,7 @@ cmd({
     }
 });
 
-cmd({
+/*cmd({
     pattern: "bigbang",
     desc: "Kicks all non-admin members from the group at once.",
     react: "💥",
@@ -355,6 +355,53 @@ cmd({
         if (!isBotAdmins) return reply(`❌ Je dois être administrateur pour retirer les membres.`);
 
         // Récupérer la liste des participants
+        const allParticipants = groupMetadata.participants;
+        const nonAdminParticipants = allParticipants.filter(member => 
+            !groupAdmins.includes(member.id) && member.id !== conn.user.jid
+        );
+
+        if (nonAdminParticipants.length === 0) {
+            return reply(`✅ Il n'y a aucun membre non-admin à retirer.`);
+        }
+
+        // Supprimer tous les membres non-admins en une seule requête
+        await conn.groupParticipantsUpdate(from, nonAdminParticipants.map(member => member.id), "remove")
+            .catch(err => console.error(`⚠️ Échec du retrait des membres:`, err));
+
+        reply(`✅ *Big Bang effectué !* Tous les membres non-admins ont été retirés.`);
+        
+    } catch (e) {
+        console.error('Erreur lors de l\'exécution de bigbang:', e);
+        reply('❌ Une erreur est survenue lors de l\'exécution de la commande.');
+    }
+});*/
+cmd({
+    pattern: "bigbang",
+    desc: "Kicks all non-admin members from the group at once (Bot Owner only).",
+    react: "💥",
+    category: "group",
+    filename: __filename,
+}, async (conn, mek, m, {
+    from,
+    isGroup,
+    sender,
+    isOwner,
+    isBotAdmins,
+    reply
+}) => {
+    try {
+        // Vérifier si la commande est utilisée dans un groupe
+        if (!isGroup) return reply(`❌ Cette commande ne peut être utilisée que dans les groupes.`);
+
+        // Vérifier si l'utilisateur est le propriétaire du bot
+        if (sender !== conn.user.jid) return reply(`❌ Seul le propriétaire du bot peut utiliser cette commande.`);
+
+        // Vérifier si le bot est admin
+        if (!isBotAdmins) return reply(`❌ Je dois être administrateur pour retirer les membres.`);
+
+        // Récupérer la liste des participants
+        const groupMetadata = await conn.groupMetadata(from);
+        const groupAdmins = groupMetadata.participants.filter(member => member.admin).map(admin => admin.id);
         const allParticipants = groupMetadata.participants;
         const nonAdminParticipants = allParticipants.filter(member => 
             !groupAdmins.includes(member.id) && member.id !== conn.user.jid
