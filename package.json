@@ -10,10 +10,13 @@
   },
   "dependencies": {
         "@adiwajshing/keyed-db": "^0.2.4",
+        "adm-zip": "^0.4.16",
+        "@dark-yasiya/yt-dl.js": "1.0.5",
         "@black-king/temp-mail-gen": "1.0.1",
         "@blackamda/song_video_dl": "1.1.0",
         "@blackamda/telegram-image-url": "^1.0.0",
         "@bochilteam/scraper": "4.2.4",
+        "ytdl-core": "^4.9.1",
         "@bochilteam/scraper-sosmed": "1.0.5",
         "@danitech/scraper": "1.0.7",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
