@@ -13,51 +13,46 @@ Github: Kgtech-cmr
 
 const config = require('../config');
 const { cmd, commands } = require('../command');
-const { proto, downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const { sms,downloadMediaMessage } = require('../lib/msg');
+const { downloadMediaMessage, sms } = require('../lib/msg');
 const fs = require('fs');
-const exec = require('child_process');
 const path = require('path');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions');
 
 cmd({
     pattern: "save",
-    desc: "Get status or media message.",
+    desc: "Envoie le message multimédia sauvegardé dans le PM du bot.",
     category: "owner",
     react: "👀",
     filename: __filename
 }, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
-        if (!quoted) return reply("Please reply to a media message!");
+        if (!quoted) return reply("❌ Répondez à un message multimédia pour le sauvegarder !");
 
-        try {
-            const buff = await quoted.getbuff;
-            const cap = quoted.msg.caption || '';
+        // Téléchargement du média
+        const mediaType = Object.keys(quoted.message)[0]; // Type du média (image, vidéo, etc.)
+        const stream = await downloadMediaMessage(quoted, 'buffer'); // Téléchargement en buffer
 
-            if (quoted.type === 'imageMessage') {
-                await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
-                    image: buff,
-                    caption: cap
-                }); 
-            } else if (quoted.type === 'videoMessage') {
-                await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
-                    video: buff,
-                    caption: cap
-                }); 
-            } else if (quoted.type === 'audioMessage') {
-                await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
-                    audio: buff,
-                    ptt: quoted.msg.ptt || false
-                }); 
-            } else {
-                return reply("_*Unknown/Unsupported media*_");
-            }
-        } catch (error) {
-            console.error(error);
-            reply(`${error}`);
+        if (!stream) return reply("❌ Échec du téléchargement du média.");
+
+        // Définition de l'extension de fichier et du type d'envoi
+        let messageOptions = {};
+        if (mediaType === 'imageMessage') {
+            messageOptions = { image: stream, caption: quoted.msg.caption || '' };
+        } else if (mediaType === 'videoMessage') {
+            messageOptions = { video: stream, caption: quoted.msg.caption || '' };
+        } else if (mediaType === 'audioMessage') {
+            messageOptions = { audio: stream, mimetype: 'audio/mp4', ptt: quoted.msg.ptt || false };
+        } else if (mediaType === 'documentMessage') {
+            messageOptions = { document: stream, mimetype: quoted.msg.mimetype, fileName: quoted.msg.fileName };
+        } else {
+            return reply("❌ Type de média non supporté pour la sauvegarde.");
         }
-    } catch (e) {
-        console.error(e);
-        reply(`${e}`);
+
+        // Envoi dans le PM du bot lui-même (botNumber)
+        await conn.sendMessage(botNumber, messageOptions);
+
+        reply("✅ Média sauvegardé et envoyé dans le PM du bot !");
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde :", error);
+        reply("❌ Une erreur est survenue lors de la sauvegarde du média.");
     }
 });
