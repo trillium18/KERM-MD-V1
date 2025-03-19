@@ -11,7 +11,7 @@ YT: KermHackTools
 Github: Kgtech-cmr
 */
 
-const {
+/*const {
 default: makeWASocket,
 useMultiFileAuthState,
 DisconnectReason,
@@ -283,4 +283,136 @@ res.send("HEY, KERM-MD-V1 STARTED ✅");
 app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
 setTimeout(() => {
 connectToWA()
-}, 4000);
+}, 4000);*/
+
+const {
+    default: makeWASocket,
+    useMultiFileAuthState,
+    DisconnectReason,
+    jidNormalizedUser,
+    getContentType,
+    fetchLatestBaileysVersion,
+    Browsers
+} = require('@whiskeysockets/baileys');
+
+const l = console.log;
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions');
+const fs = require('fs');
+const ff = require('fluent-ffmpeg');
+const P = require('pino');
+const config = require('./config');
+const qrcode = require('qrcode-terminal');
+const StickersTypes = require('wa-sticker-formatter');
+const util = require('util');
+const { sms, downloadMediaMessage } = require('./lib/msg');
+const axios = require('axios');
+const { File } = require('megajs');
+const { fromBuffer } = require('file-type');
+const bodyparser = require('body-parser');
+const { tmpdir } = require('os');
+const Crypto = require('crypto');
+const path = require('path');
+const prefix = config.PREFIX;
+
+const ownerNumber = config.OWNER_NUMBER ? [config.OWNER_NUMBER] : ['237XXXXXXXXX']; // Mets ici ton numéro correctement formaté
+
+//===================SESSION-AUTH============================
+if (!fs.existsSync(__dirname + '/auth_info_baileys/creds.json')) {
+    if (!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!');
+    const sessdata = config.SESSION_ID.replace("KERM-MD-V1~", '');
+    const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
+    filer.download((err, data) => {
+        if (err) throw err;
+        fs.writeFile(__dirname + '/auth_info_baileys/creds.json', data, () => {
+            console.log("SESSION DOWNLOADED COMPLETED ✅");
+        });
+    });
+}
+
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 9090;
+
+async function connectToWA() {
+    console.log("CONNECTING KERM_MD-V1🧬...");
+    const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/auth_info_baileys/');
+    var { version } = await fetchLatestBaileysVersion();
+
+    const conn = makeWASocket({
+        logger: P({ level: 'silent' }),
+        printQRInTerminal: false,
+        browser: Browsers.macOS("Firefox"),
+        syncFullHistory: true,
+        auth: state,
+        version
+    });
+
+    conn.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect } = update;
+        if (connection === 'close') {
+            if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
+                connectToWA();
+            }
+        } else if (connection === 'open') {
+            console.log('♻️ INSTALLING PLUGINS FILES PLEASE WAIT... 🪄');
+            const path = require('path');
+            fs.readdirSync("./plugins/").forEach((plugin) => {
+                if (path.extname(plugin).toLowerCase() === ".js") {
+                    require("./plugins/" + plugin);
+                }
+            });
+            console.log('PLUGINS FILES INSTALL SUCCESSFULLY ✅');
+            console.log('KERM_MD-V1 CONNECTED TO WHATSAPP ENJOY ✅');
+
+            const up = `*KERM_MD-V1 CONNECTED SUCCESSFULLY ✅*\n\n*Prefix:* ${prefix}\n*Owner:* ${ownerNumber[0]}`;
+            conn.sendMessage(conn.user.id, { text: up });
+        }
+    });
+
+    conn.ev.on('creds.update', saveCreds);
+
+    //============= READ STATUS ===========
+    conn.ev.on('messages.upsert', async (mek) => {
+        mek = mek.messages[0];
+        if (!mek.message) return;
+        mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message;
+
+        const m = sms(conn, mek);
+        const type = getContentType(mek.message);
+        const from = mek.key.remoteJid;
+        const quoted = (type === 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo) ? mek.message.extendedTextMessage.contextInfo.quotedMessage : null;
+        const body = (type === 'conversation') ? mek.message.conversation :
+                    (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text :
+                    (type === 'imageMessage' && mek.message.imageMessage.caption) ? mek.message.imageMessage.caption :
+                    (type === 'videoMessage' && mek.message.videoMessage.caption) ? mek.message.videoMessage.caption : '';
+        const sender = mek.key.fromMe ? (conn.user.id.split(':')[0] + '@s.whatsapp.net') : (mek.key.participant || mek.key.remoteJid);
+        const senderNumber = sender.split('@')[0];
+        const isGroup = from.endsWith('@g.us');
+        const isOwner = ownerNumber.includes(senderNumber);
+
+        const reply = (teks) => {
+            conn.sendMessage(from, { text: teks }, { quoted: mek });
+        };
+
+        // === Fonctionnalité "save" vers le PM du bot lui-même ===
+        if (body.toLowerCase() === 'save' && quoted) {
+            const savedMessage = quoted.conversation || quoted.extendedTextMessage?.text || "🔹 Message multimédia non textuel";
+
+            // Envoi du message sauvegardé dans le PM du bot lui-même
+            const botJid = conn.user.id.split(':')[0] + '@s.whatsapp.net';
+            await conn.sendMessage(botJid, {
+                text: `💾 *Message sauvegardé par ${senderNumber} :*\n\n"${savedMessage}"`,
+            });
+
+            reply("✅ Message sauvegardé et envoyé dans le PM du bot.");
+        }
+    });
+}
+
+// Lancement de la connexion
+connectToWA();
+
+// Démarrage du serveur Express pour maintenir l'instance en ligne
+app.listen(port, () => {
+    console.log(`Serveur KERM_MD-V1 en cours d'exécution sur le port ${port}`);
+});
