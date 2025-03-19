@@ -11,7 +11,7 @@ YT: KermHackTools
 Github: Kgtech-cmr
 */
 
-const config = require('../config');
+/*const config = require('../config');
 const { cmd, commands } = require('../command');
 const { proto, downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const { sms,downloadMediaMessage } = require('../lib/msg');
@@ -59,5 +59,38 @@ cmd({
     } catch (e) {
         console.error(e);
         reply(`${e}`);
+    }
+});*/
+
+const { cmd } = require('../command');
+const config = require('../config');
+
+// Remplace ce numéro par celui du propriétaire (Owner) du bot
+const ownerNumber = config.OWNER_NUMBER || '237XXXXXXXXX';
+
+cmd({
+    pattern: "save",
+    react: "💾",
+    desc: "Envoie le message sauvegardé dans le PM du Owner.",
+    category: "main",
+    use: ".save (répondre à un message)",
+    filename: __filename
+}, async (conn, mek, m, { from, quoted, sender, reply }) => {
+    try {
+        // Vérifier si c'est une réponse à un message
+        if (!quoted) return reply("❌ Réponds à un message avec 'save' pour le sauvegarder.");
+
+        // Contenu du message répondu
+        const savedMessage = quoted.text || quoted.message.conversation || "🔹 Message multimédia non textuel";
+
+        // Envoi du message dans le PM du propriétaire (Owner)
+        await conn.sendMessage(ownerNumber + '@s.whatsapp.net', {
+            text: `💾 *Message sauvegardé par ${sender}:*\n\n"${savedMessage}"`,
+        });
+
+        reply("✅ Message sauvegardé et envoyé à l'Owner.");
+    } catch (e) {
+        console.error("Erreur lors de la sauvegarde du message :", e);
+        reply("❌ Une erreur est survenue lors de l'envoi du message.");
     }
 });
