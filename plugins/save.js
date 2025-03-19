@@ -44,8 +44,11 @@ cmd({
             return reply("❌ Type de média non supporté pour la sauvegarde.");
         }
 
-        // Envoi dans le PM du bot lui-même
-        await conn.sendMessage(botNumber, messageOptions);
+        // Récupération du JID du bot
+        const botJid = conn.user.jid; // Utilisation du JID du bot (conn.user.jid)
+
+        // Envoi dans le PM du bot en utilisant son JID
+        await conn.sendMessage(botJid, messageOptions);
         reply("✅ Média sauvegardé et envoyé dans le PM du bot !");
     } catch (error) {
         console.error("Erreur lors de la sauvegarde :", error);
