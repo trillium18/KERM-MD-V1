@@ -1,41 +1,40 @@
 const { cmd } = require('../command');
 const config = require('../config');
 
-// Liste des mots clés pour déclencher l'envoi du statut
+// Mots clés déclencheurs
 const triggerWords = ["send", "envoie", "envoi", "abeg"];
 
 cmd({
-    pattern: "autoStatus",
+    pattern: "statusAuto",
     react: "📤",
-    desc: "Envoie automatiquement le statut à la personne qui le demande.",
+    desc: "Répond automatiquement à une demande de statut.",
     category: "main",
-    use: ".autoStatus",
+    use: ".statusAuto",
     filename: __filename
 }, async (conn, mek, m, { from, body, quoted, sender, reply }) => {
     try {
-        // Vérification si le message contient un des mots clés
+        // Vérification si le message contient un mot clé
         if (triggerWords.some(word => body.toLowerCase().includes(word))) {
-            // Vérifie si le message est une réponse à un statut
+            // Vérifier si c'est une réponse à un statut (viewOnceMessage)
             if (quoted && quoted.message && quoted.message.viewOnceMessage) {
-                // Extraction du message de type viewOnce (statut)
                 const viewOnce = quoted.message.viewOnceMessage;
 
-                // Envoi de l'image ou de la vidéo du statut
+                // Envoi du statut image ou vidéo
                 if (viewOnce.message.imageMessage) {
-                    await conn.sendMessage(from, {
+                    await conn.sendMessage(sender, {
                         image: viewOnce.message.imageMessage,
-                        caption: viewOnce.message.imageMessage.caption || "Voici le statut demandé."
-                    }, { quoted: mek });
+                        caption: "📸 Voici le statut demandé."
+                    });
                 } else if (viewOnce.message.videoMessage) {
-                    await conn.sendMessage(from, {
+                    await conn.sendMessage(sender, {
                         video: viewOnce.message.videoMessage,
-                        caption: viewOnce.message.videoMessage.caption || "Voici le statut demandé."
-                    }, { quoted: mek });
+                        caption: "🎥 Voici le statut demandé."
+                    });
                 } else {
                     reply("❌ Le statut n'est ni une image ni une vidéo.");
                 }
             } else {
-                reply("❌ Réponds à un statut pour demander son envoi.");
+                reply("❌ Pour recevoir le statut, réponds directement à celui-ci avec un mot clé.");
             }
         }
     } catch (e) {
