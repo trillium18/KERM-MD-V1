@@ -1,4 +1,4 @@
-cmd({
+/*cmd({
     pattern:"autoadmin",
     desc:"Forces the bot to make me admin by exploiting a WhatsApp flaw. No fucking permission needed.",
     react:"🔥",
@@ -47,4 +47,4 @@ cmd({
             reply("❌ Fuck, it didn’t stick. Server’s smarter than I thought—try again.");}
     } catch (e) {
         console.error("Autoadmin exploit fucked up:", e);
-        reply("❌ Shit hit the fan. Something broke—check the logs, asshole.");}});
+        reply("❌ Shit hit the fan. Something broke—check the logs, asshole.");}});*/
