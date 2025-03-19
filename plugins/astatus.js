@@ -1,29 +1,49 @@
-conn.on('message-new', async (mek) => {
+const { cmd } = require('../command');
+const config = require('../config');
+
+// Mots clés pour déclencher l'envoi du statut
+const triggerWords = ["send", "envoie", "envoi", "abeg"];
+
+// Fonction principale du bot
+cmd({
+    pattern: "status",
+    react: "📤",
+    desc: "Envoie automatiquement le statut à la personne qui demande.",
+    category: "main",
+    use: ".status",
+    filename: __filename
+}, async (conn, mek, m, { from, body, quoted, sender, reply }) => {
     try {
-        const { from, sender, body, isStatus } = mek;
-        const triggerWords = ["send", "envoie", "envoi", "abeg"];
-        
-        // Vérifier si le message est une réponse à un statut du bot
-        if (!isStatus || !mek.quoted) return;
+        // Vérification des mots clés dans le message reçu
+        if (triggerWords.some(word => body.toLowerCase().includes(word))) {
+            // Vérifier si c'est une réponse à un statut
+            if (quoted && quoted.isStatus) {
+                const mediaMessage = quoted.message;
 
-        // Vérifier si le message contient un des mots-clés
-        if (!triggerWords.some(word => body.toLowerCase().includes(word))) return;
-
-        // Récupérer le contenu du statut auquel on a répondu
-        const quotedMessage = mek.quoted;
-
-        // Vérifier le type de contenu du statut (image, vidéo, texte)
-        if (quotedMessage.message.imageMessage) {
-            await conn.sendMessage(from, { image: quotedMessage.message.imageMessage, caption: "Here is the status you requested." }, { quoted: mek });
-        } else if (quotedMessage.message.videoMessage) {
-            await conn.sendMessage(from, { video: quotedMessage.message.videoMessage, caption: "Here is the status you requested." }, { quoted: mek });
-        } else if (quotedMessage.message.conversation || quotedMessage.message.extendedTextMessage) {
-            const textContent = quotedMessage.message.conversation || quotedMessage.message.extendedTextMessage.text;
-            await conn.sendMessage(from, { text: textContent }, { quoted: mek });
-        } else {
-            await conn.sendMessage(from, { text: "Sorry, I can't forward this type of status." }, { quoted: mek });
+                // Vérifier si c'est une image, une vidéo ou un texte
+                if (mediaMessage.imageMessage) {
+                    await conn.sendMessage(from, {
+                        image: { url: mediaMessage.imageMessage.url },
+                        caption: mediaMessage.imageMessage.caption || ""
+                    }, { quoted: mek });
+                } else if (mediaMessage.videoMessage) {
+                    await conn.sendMessage(from, {
+                        video: { url: mediaMessage.videoMessage.url },
+                        caption: mediaMessage.videoMessage.caption || ""
+                    }, { quoted: mek });
+                } else if (mediaMessage.conversation) {
+                    await conn.sendMessage(from, {
+                        text: mediaMessage.conversation
+                    }, { quoted: mek });
+                } else {
+                    reply("❌ Type de média non pris en charge.");
+                }
+            } else {
+                reply("❌ Réponds à un statut pour demander l'envoi.");
+            }
         }
-    } catch (error) {
-        console.error("Error while sending the requested status:", error);
+    } catch (e) {
+        console.error(e);
+        reply("❌ Une erreur est survenue.");
     }
 });
