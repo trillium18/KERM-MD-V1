@@ -13,9 +13,7 @@ Github: Kgtech-cmr
 
 const config = require('../config');
 const { cmd, commands } = require('../command');
-const { downloadMediaMessage, sms } = require('../lib/msg');
-const fs = require('fs');
-const path = require('path');
+const { downloadMediaMessage } = require('../lib/msg');
 
 cmd({
     pattern: "save",
@@ -23,33 +21,31 @@ cmd({
     category: "owner",
     react: "👀",
     filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+}, async (conn, mek, m, { from, quoted, reply, botNumber }) => {
     try {
         if (!quoted) return reply("❌ Répondez à un message multimédia pour le sauvegarder !");
 
-        // Téléchargement du média
-        const mediaType = Object.keys(quoted.message)[0]; // Type du média (image, vidéo, etc.)
-        const stream = await downloadMediaMessage(quoted, 'buffer'); // Téléchargement en buffer
+        // Récupération du type de message cité
+        const mediaType = Object.keys(quoted.message)[0];
+        const stream = await downloadMediaMessage(quoted);
 
         if (!stream) return reply("❌ Échec du téléchargement du média.");
 
-        // Définition de l'extension de fichier et du type d'envoi
         let messageOptions = {};
-        if (mediaType === 'imageMessage') {
+        if (mediaType.includes('image')) {
             messageOptions = { image: stream, caption: quoted.msg.caption || '' };
-        } else if (mediaType === 'videoMessage') {
+        } else if (mediaType.includes('video')) {
             messageOptions = { video: stream, caption: quoted.msg.caption || '' };
-        } else if (mediaType === 'audioMessage') {
+        } else if (mediaType.includes('audio')) {
             messageOptions = { audio: stream, mimetype: 'audio/mp4', ptt: quoted.msg.ptt || false };
-        } else if (mediaType === 'documentMessage') {
+        } else if (mediaType.includes('document')) {
             messageOptions = { document: stream, mimetype: quoted.msg.mimetype, fileName: quoted.msg.fileName };
         } else {
             return reply("❌ Type de média non supporté pour la sauvegarde.");
         }
 
-        // Envoi dans le PM du bot lui-même (botNumber)
+        // Envoi dans le PM du bot lui-même
         await conn.sendMessage(botNumber, messageOptions);
-
         reply("✅ Média sauvegardé et envoyé dans le PM du bot !");
     } catch (error) {
         console.error("Erreur lors de la sauvegarde :", error);
